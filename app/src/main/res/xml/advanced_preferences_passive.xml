@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="Advanced Configuration">
+        <Preference
+            android:key="set_device_identifier"
+            android:title="Set Unit Identifier"
+            android:summary="Set the identifier for the device."
+            android:defaultValue="0"/>
+        <SwitchPreference
+            android:key="change_led"
+            android:title="Switch LED on/off"
+            android:summary="Enable or disable the LED GPIO (1 for with flash 11 for no flash)"/>
+        <SwitchPreference
+            android:key="change_temp"
+            android:title="Switch temperature sensor on/off"
+            android:summary="Enable or disable the temperature sensor GPIO (4) "/>
+        <SwitchPreference
+            android:key="change_force"
+            android:title="Switch force sensor on/off"
+            android:summary="Enable or disable the force sensor GPIO (5)"/>
+        <Preference
+            android:key="external_flash_test"
+            android:title="External Flash Test"
+            android:summary="This will test the sensor external memory. Please ensure data is all erased before test." />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Device Calibration">
+        <Preference
+            android:key="check_calibration_status"
+            android:title="Re-Check Force Calibration Status"
+            android:summary="Reload force calibration values from device."/>
+        <Preference
+            android:key="set_0N_value"
+            android:title="Set 0N Value"
+            android:summary="Set 0N Calibration Value"/>
+        <Preference
+            android:key="set_1N_value"
+            android:title="Set 1N Value"
+            android:summary="Set 1N Calibration Value"/>
+        <Preference
+            android:key="set_2N_value"
+            android:title="Set 2N Value"
+            android:summary="Set 2N Calibration Value"/>
+        <Preference
+            android:key="set_6N_value"
+            android:title="Set 6N Value"
+            android:summary="Set 6N Calibration Value"/>
+        <Preference
+            android:key="input_cali_value"
+            android:title="Input Calibration Value"
+            android:summary="Manually input calibration value (unit: V)"/>
+        <Preference
+            android:key="save_calibration"
+            android:title="Save Current Force Calibration"
+            android:summary="Write current device force calibration value into memory"/>
+        <Preference
+            android:key="save_temp_calibration"
+            android:title="Save Current Temperature Calibration"
+            android:summary="Write current device temperature calibration value into memory"/>
+        <Preference
+            android:key="check_temp_calibration"
+            android:title="Re-Check Temperature Calibration Status"
+            android:summary="Reload temperature calibration values from device."/>
+    </PreferenceCategory>
+
+</PreferenceScreen>

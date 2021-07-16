@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">BM-Single v2.2</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Brace Monitor</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_download">Download</string>
+    <string name="action_upload">Upload</string>
+    <string name="action_clear">Clear Memory</string>
+
+    <string name="title_section1">Real-time Plot</string>
+    <string name="title_section3">Device Config</string>
+    <string name="title_section4">Advanced</string>
+    <string name="title_section5">Terminate Link</string>
+    <string name="title_section6">Analyze</string>
+</resources>

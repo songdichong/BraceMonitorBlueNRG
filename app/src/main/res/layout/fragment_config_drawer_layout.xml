@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id = "@+id/start_datetime_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:text= "Start Date and Time"
+            android:textColor="@color/black_color"
+            android:textSize="20dp"/>
+
+        <ImageButton
+            android:id="@+id/config_start_datetime_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/configure_sensor"
+            android:contentDescription="config start time"
+            android:layout_alignParentRight="true"/>
+
+        <TextView
+            android:id="@+id/start_datetime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="-50dp"
+            android:text=""
+            android:textSize="20dp"
+            android:textColor="@color/orange_color"
+            android:layout_below="@+id/start_datetime_title"
+            android:layout_centerInParent="true" />
+
+        <TextView
+            android:id = "@+id/end_datetime_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/config_start_datetime_button"
+            android:layout_alignStart="@+id/start_datetime_title"
+            android:layout_marginTop="10dp"
+            android:text= "End Date and Time"
+            android:textColor="@color/black_color"
+            android:textSize="20dp"/>
+
+        <ImageButton
+            android:id="@+id/config_end_datetime_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/configure_sensor"
+            android:contentDescription="config end time"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/config_start_datetime_button"/>
+
+        <TextView
+            android:id="@+id/end_datetime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="20dp"
+            android:textColor="@color/orange_color"
+            android:layout_below="@+id/end_datetime_title"
+            android:layout_centerInParent="true" />
+
+        <TextView
+            android:id="@+id/reference_force_value_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reference Force Value (N):"
+            android:textSize="20dp"
+            android:layout_marginLeft="10dp"
+            android:textColor="@color/black_color"
+            android:layout_below="@+id/config_end_datetime_button" />
+
+        <EditText
+            android:id="@+id/reference_force_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1.00"
+            android:inputType="numberDecimal"
+            android:textSize="25dp"
+            android:textColor="@color/red_color"
+            android:layout_below="@+id/reference_force_value_title"
+            android:layout_centerInParent="true"/>
+
+        <ImageButton
+            android:id="@+id/config_reference_force_value_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/save"
+            android:contentDescription="save force"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/config_end_datetime_button"/>
+
+        <TextView
+            android:id="@+id/reference_temperature_value_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reference Temperature Value (℃):"
+            android:textSize="20dp"
+            android:textColor="@color/black_color"
+            android:layout_marginLeft="10dp"
+            android:layout_below="@+id/reference_force_value" />
+
+        <EditText
+            android:id="@+id/reference_temperature_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="28.0"
+            android:inputType="numberDecimal"
+            android:textSize="25dp"
+            android:textColor="@color/red_color"
+            android:layout_below="@+id/reference_temperature_value_title"
+            android:layout_centerInParent="true"/>
+
+
+        <ImageButton
+            android:id="@+id/config_reference_temperature_value_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/save"
+            android:contentDescription="save temperature"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/config_reference_force_value_button"/>
+
+        <Button
+            android:id="@+id/draw_force_plot_button"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="Force Compliance"
+            android:layout_below="@+id/reference_temperature_value"
+            android:layout_marginTop="30dp"
+            android:background="@color/orange_color"
+            android:layout_centerInParent="true"/>
+
+        <Button
+            android:id="@+id/draw_temperature_plot_button"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="Temperature Compliance"
+            android:layout_below="@+id/draw_force_plot_button"
+            android:layout_alignStart="@+id/draw_force_plot_button"
+            android:background="@color/blue_color" />
+
+        <Button
+            android:id="@+id/draw_avg_force_plot_button"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="Daily Force Average"
+            android:layout_below="@+id/draw_temperature_plot_button"
+            android:layout_alignStart="@+id/draw_force_plot_button"
+            android:background="@color/green_color" />
+
+        <Button
+            android:id="@+id/draw_avg_temperature_plot_button"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="Daily Temperature Average"
+            android:layout_below="@+id/draw_avg_force_plot_button"
+            android:layout_alignStart="@+id/draw_force_plot_button"
+            android:background="@color/red_color" />
+    </RelativeLayout>
+
+</LinearLayout>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="#ffdbdbdb"
+        android:orientation="horizontal"
+        android:paddingBottom="5dp">
+
+        <TextView
+            android:id="@+id/force_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="35dp"
+            android:fontFamily="@string/title_section3"
+            android:text="Force Level" />
+
+        <TextView
+            android:id="@+id/force_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/force_label"
+            android:layout_alignBottom="@+id/force_label"
+            android:layout_marginStart="14dp"
+            android:layout_toEndOf="@+id/force_label"
+            android:text="force_value"
+            android:textColor="@color/green_color" />
+        <TextView
+            android:id="@+id/force_voltage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_toEndOf="@+id/force_label"
+            android:layout_below ="@+id/force_label"
+            android:text="force_voltage"
+            android:textColor="@color/green_color" />
+
+        <TextView
+            android:id="@+id/device_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/force_value"
+            android:layout_alignStart="@+id/force_label"
+            android:layout_marginBottom="3dp"
+            android:text="Device Name"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textStyle="italic" />
+
+        <TextView
+            android:id="@+id/temperature_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/force_value"
+            android:layout_gravity="top"
+            android:layout_marginLeft="15dp"
+            android:layout_toEndOf="@+id/force_value"
+            android:fontFamily="@string/title_section3"
+            android:text="Temp. Level" />
+
+        <TextView
+            android:id="@+id/temperature_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/device_name"
+            android:layout_marginLeft="14dp"
+            android:layout_toEndOf="@+id/temperature_label"
+            android:text="temp_level"
+            android:textColor="@color/green_color" />
+        <TextView
+            android:id="@+id/temperature_voltage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="14dp"
+            android:layout_toEndOf="@+id/temperature_label"
+            android:layout_below ="@+id/temperature_value"
+            android:text="temperature_voltage"
+            android:textColor="@color/green_color" />
+
+    </RelativeLayout>
+
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>
+
+

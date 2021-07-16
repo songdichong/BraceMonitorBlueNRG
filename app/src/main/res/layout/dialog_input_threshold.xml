@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/popup_background">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:padding="16dp">
+
+        <EditText
+            android:id="@+id/first_input"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:enabled="true"
+            android:hint="low threshold"
+            android:inputType="numberDecimal"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp" />
+
+        <EditText
+            android:id="@+id/second_input"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:enabled="true"
+            android:hint="high thresold"
+            android:inputType="numberDecimal"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/first_input"/>
+
+        <Button
+            android:id="@+id/cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Cancel"
+            android:layout_below="@+id/second_input"
+            android:layout_alignStart="@+id/first_input" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OK"
+            android:id="@+id/confirm"
+            android:layout_alignBottom="@+id/cancel"
+            android:layout_alignEnd="@+id/first_input" />
+
+    </RelativeLayout>
+</RelativeLayout>

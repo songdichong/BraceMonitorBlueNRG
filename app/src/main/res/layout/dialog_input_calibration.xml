@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/popup_background">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:padding="16dp">
+
+        <EditText
+            android:id="@+id/cali_val_0N"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:enabled="true"
+            android:hint="0N calibration val"
+            android:inputType="numberDecimal"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp" />
+
+        <EditText
+            android:id="@+id/cali_val_1N"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:enabled="true"
+            android:hint="1N calibration val"
+            android:inputType="numberDecimal"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/cali_val_0N"/>
+
+
+        <EditText
+            android:id="@+id/cali_val_2N"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:enabled="true"
+            android:hint="2N calibration val"
+            android:inputType="numberDecimal"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/cali_val_1N"/>
+        <EditText
+            android:id="@+id/cali_val_6N"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:enabled="true"
+            android:hint="6N calibration val"
+            android:inputType="numberDecimal"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/cali_val_2N"/>
+
+        <Button
+            android:id="@+id/cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Cancel"
+            android:layout_below="@+id/cali_val_6N"
+            android:layout_alignStart="@+id/cali_val_0N" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OK"
+            android:id="@+id/confirm"
+            android:layout_alignBottom="@+id/cancel"
+            android:layout_alignEnd="@+id/cali_val_0N" />
+
+    </RelativeLayout>
+</RelativeLayout>

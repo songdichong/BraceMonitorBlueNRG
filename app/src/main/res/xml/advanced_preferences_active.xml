@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="Advanced Configuration">
+        <Preference
+            android:key="set_device_identifier"
+            android:title="Set Unit Identifier"
+            android:summary="Set the identifier for the device."
+            android:defaultValue="0"/>
+        <SwitchPreference
+            android:key="change_led"
+            android:title="Switch LED on/off"
+            android:summary="Enable or disable LED (GPIO 1 for with flash, GPIO 11 for no flash)"/>
+        <SwitchPreference
+            android:key="change_temp"
+            android:title="Switch pump on/off"
+            android:summary="Enable or disable pump (GPIO 8) "/>
+        <SwitchPreference
+            android:key="change_leak"
+            android:title="Switch leak valve on/off"
+            android:summary="Enable or disable leak valve (GPIO 6)"/>
+        <SwitchPreference
+            android:key="change_valve_power"
+            android:title="Switch valve power on/off"
+            android:summary="Enable or disable the valve power (GPIO 4)"/>
+        <SwitchPreference
+            android:key="change_sensor_power"
+            android:title="Switch sensor power on/off"
+            android:summary="Enable or disable the force sensor (GPIO 14)"/>
+        <Preference
+            android:key="inflate_1s"
+            android:title="Inflate for 1 second"
+            android:summary="The device will inflate air for 1 second"/>
+        <Preference
+            android:key="deflate_1s"
+            android:title="Deflate for 1 second"
+            android:summary="The device will deflate air for 1 second"/>
+        <Preference
+            android:key="external_flash_test"
+            android:title="External Flash Test"
+            android:summary="This will test the sensor external memory. Please ensure data is all erased before test." />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Force Calibration">
+        <Preference
+            android:key="input_calibration_val"
+            android:title="Input calibration Value"
+            android:summary="Manually set slope and intercept"/>
+        <Preference
+            android:key="check_calibration_status"
+            android:title="Re-Check Calibration Status"
+            android:summary="Reload calibration values from device."/>
+
+        <Preference
+            android:key="set_threshold"
+            android:title="Set Threshold Value"
+            android:summary="Set Threshold Value"/>
+        <Preference
+            android:key="read_threshold"
+            android:title="Re-Check Threshold"
+            android:summary="Reload threshold values from device."/>
+
+        <Preference
+            android:key="save_temp_calibration"
+            android:title="Save Current Temperature Calibration"
+            android:summary="Write current device temperature calibration value into memory"/>
+        <Preference
+            android:key="check_temp_calibration"
+            android:title="Re-Check Temperature Calibration Status"
+            android:summary="Reload temperature calibration values from device."/>
+    </PreferenceCategory>
+
+</PreferenceScreen>

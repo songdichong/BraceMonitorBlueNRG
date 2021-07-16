@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black_color"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:id="@+id/button_Bar">
+
+            <Button
+                android:id="@+id/start_sampling"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="Start\nSampling" />
+
+            <Button
+                android:id="@+id/stop_sampling"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="Stop\nSampling" />
+            <Button
+                android:id="@+id/set_target"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="Set\nTarget" />
+            <Button
+                android:id="@+id/save_real_time_data"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="true"
+                android:text="Save\nData" />
+        </LinearLayout>
+
+<!--        <ProgressBar-->
+<!--            style="@android:style/Widget.ProgressBar.Horizontal"-->
+<!--            android:layout_width="fill_parent"-->
+<!--            android:layout_height="20dp"-->
+<!--            android:id="@+id/init_bar"-->
+<!--            android:layout_below="@id/button_Bar"-->
+<!--            android:progress="0" />-->
+
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:id="@+id/init_text"-->
+<!--            android:layout_centerHorizontal="true"-->
+<!--            android:text="loading..."-->
+<!--            android:layout_below="@+id/button_Bar"-->
+<!--            />-->
+
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    <com.androidplot.xy.XYPlot
+        android:id="@+id/dynamicXYPlot"
+        androidPlot.domainLabel="Domain"
+        androidPlot.domainLabelWidget.labelPaint.textSize="14dp"
+        androidPlot.graphWidget.domainLabelPaint.textSize="14dp"
+        androidPlot.graphWidget.domainOriginLabelPaint.textSize="14dp"
+        androidPlot.graphWidget.marginBottom="25dp"
+        androidPlot.graphWidget.marginLeft="15dp"
+        androidPlot.graphWidget.marginRight="10dp"
+        androidPlot.graphWidget.marginTop="20dp"
+        androidPlot.graphWidget.rangeLabelPaint.textSize="14dp"
+        androidPlot.graphWidget.rangeOriginLabelPaint.textSize="14dp"
+        androidPlot.legendWidget.heightMetric.value="25dp"
+        androidPlot.legendWidget.iconSizeMetrics.heightMetric.value="15dp"
+        androidPlot.legendWidget.iconSizeMetrics.widthMetric.value="15dp"
+        androidPlot.legendWidget.positionMetrics.anchor="right_bottom"
+        androidPlot.legendWidget.textPaint.textSize="14dp"
+        androidPlot.rangeLabel="Range"
+        androidPlot.rangeLabelWidget.labelPaint.textSize="14dp"
+        androidPlot.title=""
+        androidPlot.titleWidget.labelPaint.textSize="15dp"
+        androidplot.renderMode="use_background_thread"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+
+    <LinearLayout
+        android:id="@+id/plot_info_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:background="@color/popup_background"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:layout_centerHorizontal="true"
+        android:visibility="invisible">
+
+        <TextView
+            android:id="@+id/force_value_popup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="Force [N]: -"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/green_color" />
+
+    </LinearLayout>
+    </RelativeLayout>
+</LinearLayout>

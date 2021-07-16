@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/nav_realtime_plot"
+            android:icon="@drawable/line_chart"
+            android:title="@string/title_section1" />
+
+        <item
+            android:id="@+id/nav_config_sensor"
+            android:icon="@drawable/configure_sensor"
+            android:title="@string/title_section3" />
+
+        <item
+            android:id="@+id/nav_download_data"
+            android:icon="@drawable/download"
+            android:title="Output Data"/>
+
+        <item
+            android:id="@+id/nav_terminate_link"
+            android:icon="@drawable/disconnect"
+            android:title="@string/title_section5" />
+
+        <item
+            android:id="@+id/nav_analyze_data"
+            android:icon="@drawable/analyze"
+            android:title="@string/title_section6" />
+    </group>
+
+    <item android:title="Advanced">
+        <menu>
+            <item
+                android:id="@+id/nav_calibration"
+                android:icon="@drawable/calibration"
+                android:title="Calibration"
+                android:enabled="false"/>
+            <item
+                android:id="@+id/nav_advanced_config"
+                android:icon="@drawable/settings_icon"
+                android:title="@string/title_section4" />
+        </menu>
+    </item>
+
+</menu>

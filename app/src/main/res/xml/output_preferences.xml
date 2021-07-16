@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="Output">
+        <Preference
+            android:key="start_data_download"
+            android:title="Download Log" />
+        <Preference
+            android:key="upload_data_email"
+            android:title="Email Log" />
+        <Preference
+            android:key="erase_flash"
+            android:title="Erase Device Memory" />
+    </PreferenceCategory>
+</PreferenceScreen>

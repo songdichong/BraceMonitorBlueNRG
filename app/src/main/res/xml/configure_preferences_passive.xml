@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="Device Configuration">
+        <Preference
+            android:key="set_subject"
+            android:title="Set Subject ID" />
+        <Preference
+            android:key="sampling_rate"
+            android:title="Sampling Rate"
+            android:summary="Unit: minute per sample."/>
+        <Preference
+            android:key="sleep_wake_time"
+            android:title= "Set Sleep and Wakeup Time"
+            android:enabled="false"/>
+        <Preference
+            android:key="save"
+            android:title="Save"
+            android:summary="Save subject ID, target force and sample rate."/>
+        <Preference
+            android:key="start_long_term"
+            android:title="Start Long Term Sampling" />
+    </PreferenceCategory>
+</PreferenceScreen>

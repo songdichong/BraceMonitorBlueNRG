@@ -1,0 +1,71 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/transparent_grey"
+    tools:context="ca.ualberta.songdichong.bracemonitorbluenrg.Fragments.DeviceScanFragment">
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="10dp"
+        android:background="@android:color/white">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/bluetooth_list"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="25dp"
+            android:text="Select Bluetooth Device:" />
+
+        <ListView
+            android:id="@+id/bluetooth_list"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:background="#ffebebeb"
+            android:layout_marginTop="15dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"/>
+
+
+
+        <RelativeLayout
+            android:id="@+id/relativeLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/bluetooth_list"
+            android:layout_centerHorizontal="true">
+
+            <Button
+                android:id="@+id/cancel_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="40dp"
+                android:text="Cancel" />
+
+            <Button
+                android:id="@+id/scan_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@+id/cancel_button"
+                android:text="Scan" />
+
+        </RelativeLayout>
+
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="150dp"
+            android:layout_height="75dp"
+            android:layout_above="@+id/textView"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center_horizontal|top" />
+
+
+
+    </RelativeLayout>
+
+</FrameLayout>

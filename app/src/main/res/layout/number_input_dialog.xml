@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:ems="6"
             android:hint="number"
-            android:inputType="number"
+            android:inputType="numberDecimal"
             android:layout_gravity="center" />
 
         <RelativeLayout

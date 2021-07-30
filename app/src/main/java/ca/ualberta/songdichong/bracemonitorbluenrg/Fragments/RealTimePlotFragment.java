@@ -9,13 +9,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.BlendModeColorFilter;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.text.InputType;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Gravity;
@@ -23,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -77,6 +82,8 @@ public class RealTimePlotFragment extends Fragment {
     private MyPlotUpdater plotUpdater;
     private SampleDynamicXYDatasource data;
     private List<RealTimeData> realTimeDataList = new ArrayList<>();
+    Button setTargetForce;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -84,12 +91,11 @@ public class RealTimePlotFragment extends Fragment {
         rootView = inflater.inflate(R.layout.plot_fragment_layout, container, false);
         final Button startSampling = rootView.findViewById(R.id.start_sampling);
         final Button stopSampling = rootView.findViewById(R.id.stop_sampling);
-        final Button setTargetForce = rootView.findViewById(R.id.set_target);
+        setTargetForce  = rootView.findViewById(R.id.set_target);
         final Button saveRealTimeDataButton = rootView.findViewById(R.id.save_real_time_data);
         if (BluetoothLeService.calibrated && BluetoothLeService.connected) {
             startSampling.setEnabled(true);
             stopSampling.setEnabled(true);
-
         } else {
             startSampling.setEnabled(false);
             stopSampling.setEnabled(false);
@@ -111,38 +117,13 @@ public class RealTimePlotFragment extends Fragment {
                 setTargetForce.setEnabled(BluetoothLeService.realTimeSampling);
             }
         });
-        setTargetForce.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            if (data.forceArray.length > 0){
-                mBluetoothLeService.setTargetForce(data.currentForce);
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage("Do you want to save subject ID, target force and sample rate?")
-                        .setCancelable(false)
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                mBluetoothLeService.directControlUnit(3,true);
-                            }
-                        })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        })
-                        .setTitle("Save?")
-                        .setIcon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
-                AlertDialog alert = builder.create();
-                alert.show();
-            }
-            }
-        });
+
         saveRealTimeDataButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showUploadDialog();
             }
         });
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         dynamicPlot = (XYPlot) rootView.findViewById(R.id.dynamicXYPlot);
         plotUpdater = new MyPlotUpdater(dynamicPlot);
         int yMin = 0;
@@ -157,6 +138,9 @@ public class RealTimePlotFragment extends Fragment {
         // getInstance and position datasets:
         data = new SampleDynamicXYDatasource(xMax);
         SampleDynamicSeries forceSeries = new SampleDynamicSeries(data, "Force (N)");
+        if (mBluetoothLeService.getDeviceInfoVal() == Constants.activeBraceMonitor){
+            forceSeries = new SampleDynamicSeries(data, "Pressure (mmHg)");
+        }
         // hook up the plotUpdater to the data model:
         data.addObserver(plotUpdater);
 
@@ -210,6 +194,51 @@ public class RealTimePlotFragment extends Fragment {
         intentFilter.addAction(Constants.ACTION_FORCE_UPDATE);
         intentFilter.addAction(Constants.ACTION_GATT_DISCONNECTED);
         getActivity().getApplicationContext().registerReceiver(updateReceiver, intentFilter);
+        if (mBluetoothLeService.adjustmentEnabled){
+//            setTargetForce.setBackgroundResource(R.drawable.green_rectangle_button);
+            setTargetForce.getBackground().setColorFilter(new PorterDuffColorFilter(getResources().getColor(R.color.green_color), PorterDuff.Mode.MULTIPLY));
+        }else {
+//            setTargetForce.setBackgroundResource(R.color.white_color);
+            setTargetForce.getBackground().clearColorFilter();
+        }
+        setTargetForce.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mBluetoothLeService.getDeviceInfoVal()== Constants.activeBraceMonitor){
+                    if (mBluetoothLeService.adjustmentEnabled){
+                        mBluetoothLeService.adjustmentEnabled = false;
+                        mBluetoothLeService.setTargetPressure(0xff,0xff);
+//                        setTargetForce.setBackgroundResource(android.R.drawable.btn_default);
+                        setTargetForce.getBackground().clearColorFilter();
+
+                    }else {
+                        showInputDialog();
+                    }
+
+                } else {
+                    if (data.forceArray.length > 0){
+                        mBluetoothLeService.setTargetForce(data.currentForce);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        builder.setMessage("Do you want to save subject ID, target force and sample rate?")
+                                .setCancelable(false)
+                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        mBluetoothLeService.directControlUnit(3,true);
+                                    }
+                                })
+                                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                })
+                                .setTitle("Save?")
+                                .setIcon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
+                        AlertDialog alert = builder.create();
+                        alert.show();
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -406,6 +435,55 @@ public class RealTimePlotFragment extends Fragment {
             return currentTime.toString() + " " + String.format("%.2f",force);
         }
     }
+
+    void showInputDialog(){
+        LayoutInflater layoutInflater = (LayoutInflater) getActivity()
+                .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+        View layout = layoutInflater.inflate(R.layout.dialog_input_threshold, null, false);
+        final PopupWindow popupWindow = new PopupWindow(layout,
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, true);
+        popupWindow.setContentView(layout);
+        popupWindow.setAnimationStyle(R.style.Animation);
+        final EditText firstInput = layout.findViewById(R.id.first_input);
+        final EditText secondInput = layout.findViewById(R.id.second_input);
+        Button button = layout.findViewById(R.id.confirm);
+        firstInput.setHint("target pressure");
+        secondInput.setHint("allowance");
+        firstInput.setInputType(InputType.TYPE_CLASS_NUMBER);
+        secondInput.setInputType(InputType.TYPE_CLASS_NUMBER);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try{
+                    int targetPressure = Integer.parseInt(firstInput.getText().toString());
+                    int allowance = Integer.parseInt(secondInput.getText().toString());
+                    if (targetPressure >= 1 && allowance >= 1 && targetPressure-allowance>=0){
+                        mBluetoothLeService.setTargetPressure(targetPressure,allowance);
+                        mBluetoothLeService.adjustmentEnabled = true;
+//                        setTargetForce.setBackgroundResource(R.drawable.green_rectangle_button);
+                        setTargetForce.getBackground().setColorFilter(new PorterDuffColorFilter(getResources().getColor(R.color.green_color), PorterDuff.Mode.MULTIPLY));
+
+                        popupWindow.dismiss();
+                    }
+                    else {
+                        mBluetoothLeService.makeToast("pressure and allowance should >= 1, and pressure should be greater than allowance");
+                    }
+                }
+                catch (Exception exception){
+                    mBluetoothLeService.makeToast("input is not valid");
+                }
+            }
+        });
+        Button cancelButton = (Button) layout.findViewById(R.id.cancel);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });
+        popupWindow.showAtLocation(layout, Gravity.TOP, 0, 0);
+    }
+
     public void showUploadDialog() {
         saveRealTimeData();
         LayoutInflater layoutInflater = (LayoutInflater) getActivity()

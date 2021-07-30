@@ -22,12 +22,12 @@
             android:summary="Enable or disable leak valve (GPIO 6)"/>
         <SwitchPreference
             android:key="change_valve_power"
-            android:title="Switch valve power on/off"
-            android:summary="Enable or disable the valve power (GPIO 4)"/>
+            android:title="Switch pump valve power on/off"
+            android:summary="Enable or disable the pump valve power (GPIO 4)"/>
         <SwitchPreference
             android:key="change_sensor_power"
             android:title="Switch sensor power on/off"
-            android:summary="Enable or disable the force sensor (GPIO 14)"/>
+            android:summary="Enable or disable the sensor power (GPIO 14)"/>
         <Preference
             android:key="inflate_1s"
             android:title="Inflate for 1 second"
@@ -43,7 +43,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="Force Calibration">
+        android:title="Pressure Calibration">
         <Preference
             android:key="input_calibration_val"
             android:title="Input calibration Value"

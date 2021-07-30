@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.util.Log;
@@ -58,6 +59,7 @@ public class ConfigureSensorFragment extends PreferenceFragment{
     TextView batteryText;
     TextView temperatureText;
     TextView deviceName;
+    TextView versionText;
         BluetoothLeService mBluetoothLeService;
     int[] sleepWakeTimeArray = new int[4];
     /*1. Assign buttons(preference) using findPreference function.
@@ -82,25 +84,29 @@ public class ConfigureSensorFragment extends PreferenceFragment{
                 return true;
             }
         });
-        Preference setSleepWakeButton = findPreference("sleep_wake_time");
+        ListPreference setSleepButton = (ListPreference)findPreference("sleep_time");
         if (mBluetoothLeService.getDeviceInfoVal() == Constants.activeBraceMonitor){
-            setSleepWakeButton.setEnabled(true);
+            setSleepButton.setEnabled(true);
         }
-        setSleepWakeButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage("Sleep time followed by wakeup time.")
-                        .setCancelable(true)
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                showTimePopup();
-                            }
-                        })
-                        .setTitle("Warning!")
-                        .setIcon(getResources().getDrawable(android.R.drawable.ic_dialog_alert));
-                AlertDialog alert = builder.create();
-                alert.show();
-
+        setSleepButton.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                String values = newValue.toString();
+                byte[] sendingWake = new byte[]{(byte)0xFF,(byte)0xFF,Byte.parseByte(values),0,(byte)0xFF,(byte)0xFF};
+                mBluetoothLeService.setDeviceWakeupTime(sendingWake);
+                return true;
+            }
+        });
+        ListPreference setWakeButton = (ListPreference)findPreference("wake_time");
+        if (mBluetoothLeService.getDeviceInfoVal() == Constants.activeBraceMonitor){
+            setWakeButton.setEnabled(true);
+        }
+        setWakeButton.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                String values = newValue.toString();
+                byte[] sendingWake = new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,Byte.parseByte(values),0};
+                mBluetoothLeService.setDeviceWakeupTime(sendingWake);
                 return true;
             }
         });
@@ -151,6 +157,7 @@ public class ConfigureSensorFragment extends PreferenceFragment{
         batteryText = (TextView) v.findViewById(R.id.battery_value);
         temperatureText = (TextView) v.findViewById(R.id.temperature_value);
         deviceName = (TextView) v.findViewById(R.id.device_name);
+        versionText = (TextView) v.findViewById(R.id.version_value);
         return v;
     }
 
@@ -159,6 +166,7 @@ public class ConfigureSensorFragment extends PreferenceFragment{
         super.onResume();
         batteryText.setText(String.format("%.2f",mBluetoothLeService.batteryVal) + "V");
         deviceName.setText(mBluetoothLeService.deviceName);
+        versionText.setText("v"+mBluetoothLeService.getDeviceVersionVal());
         IntentFilter filter = new IntentFilter();
         filter.addAction(Constants.ACTION_TEMP_UPDATE);
         filter.addAction(Constants.ACTION_GATT_DISCONNECTED);
@@ -169,30 +177,6 @@ public class ConfigureSensorFragment extends PreferenceFragment{
     public void onPause() {
         super.onPause();
         getActivity().getApplicationContext().unregisterReceiver(updateReceiver);
-    }
-
-    public void showTimePopup() {
-        TimePickerDialog tpd = new TimePickerDialog(getActivity(),
-                new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay,
-                                          int minute) {
-                        sleepWakeTimeArray[0] = hourOfDay;
-                        sleepWakeTimeArray[1] = minute;
-                        TimePickerDialog tpd = new TimePickerDialog(getActivity(),
-                                new TimePickerDialog.OnTimeSetListener() {
-                                    @Override
-                                    public void onTimeSet(TimePicker view, int hourOfDay,
-                                                          int minute) {
-                                        sleepWakeTimeArray[2] = hourOfDay;
-                                        sleepWakeTimeArray[3] = minute;
-                                        mBluetoothLeService.setDeviceWakeupTime(sleepWakeTimeArray);
-                                    }
-                                }, 8,0, true);
-                        tpd.show();
-                    }
-                }, 22,0, true);
-        tpd.show();
     }
 
     public final BroadcastReceiver updateReceiver = new BroadcastReceiver() {

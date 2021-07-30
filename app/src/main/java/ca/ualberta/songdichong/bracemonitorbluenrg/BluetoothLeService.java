@@ -151,9 +151,10 @@ public class BluetoothLeService {
     private int recordSecond = 0;
 
     private int deviceInfoVal = -1;
+    private int deviceVersionVal = 0;
 
     static public List<Records> downloadedData = new ArrayList<>();
-
+    public boolean adjustmentEnabled = false;
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     /*
      * Function Name: setContext
@@ -406,6 +407,7 @@ public class BluetoothLeService {
                                 if (initializing) {
                                     getBatteryLevel();
                                 }
+                                deviceVersionVal = characteristic.getValue()[0];
                                 Log.v("Version", String.valueOf(characteristic.getValue()[0]));
                             }
                         }
@@ -482,14 +484,16 @@ public class BluetoothLeService {
 //                            }
 //                        }
                         if (characteristic.getUuid().equals(UUID_FORCE_1N_CALIBRATION)){
-                            if (firstRead){
-                                getCalibrationValue(1);
-                                firstRead = false;
-                            }
-                            else {
-                                forceCaliVal2 = characteristic.getValue()[0] < 0 ? characteristic.getValue()[0]+256:characteristic.getValue()[0];
-                                forceCaliVal3 = characteristic.getValue()[1] < 0 ? characteristic.getValue()[1]+256:characteristic.getValue()[1];
-                                makeToast(String.format("low: %.0f",forceCaliVal2)+"\n"+ String.format("high: %.0f",forceCaliVal3));
+                            if (deviceInfoVal == activeBraceMonitor){
+                                if (firstRead){
+                                    getCalibrationValue(1);
+                                    firstRead = false;
+                                }
+                                else{
+                                    forceCaliVal2 = characteristic.getValue()[0] < 0 ? characteristic.getValue()[0]+256:characteristic.getValue()[0];
+                                    forceCaliVal3 = characteristic.getValue()[1] < 0 ? characteristic.getValue()[1]+256:characteristic.getValue()[1];
+                                    makeToast(String.format("low: %.0f",forceCaliVal2)+"\n"+ String.format("high: %.0f",forceCaliVal3));
+                                }
                             }
                         }
 
@@ -854,6 +858,18 @@ public class BluetoothLeService {
         }
     }
 
+    public void setTargetPressure(int targetPressure, int allowance){
+        try{
+            BluetoothGattService service = mBluetoothGatt.getService(UUID_FORCE_SENSOR_SERV);
+            BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID_TARGET_FORCE_VALUE);
+            characteristic.setValue(new byte[]{(byte)targetPressure,(byte)allowance});
+            mBluetoothGatt.writeCharacteristic(characteristic);
+        }
+        catch (Exception e){
+            makeToast("Set target force failed. Please connect again and try.");
+        }
+    }
+
     /*
      * Function Name: eraseAllFlash
      *
@@ -1138,6 +1154,7 @@ public class BluetoothLeService {
             }
             else if ( (arrays[index] == -1) && (arrays[index+1] == -1)
                     && (arrays[index+2] == -1) && (arrays[index+3] == -1)){
+                stopDownloadData();
                 break;
             }
             else {
@@ -1146,7 +1163,8 @@ public class BluetoothLeService {
                 byte[] temperatureArray = new byte[]{arrays[index+2], arrays[index+3]};
                 double temperature = convertADC(temperatureArray, temperatureSensor);
                 double forceVoltage = convertADC(forceArray, ADC_Input_AdcPin2);
-                int longTermFlag = (arrays[index+4] < 0? arrays[index+4] + 256 : arrays[index+4]) + arrays[index+5]*128;
+                int longTermFlag = (arrays[index+4] < 0? arrays[index+4] + 256 : arrays[index+4]) + arrays[index+5]*256;
+                Log.v("ltf",arrays[index+4]+" "+arrays[index+5]+" "+longTermFlag);
                 //forceCaliVal0 == slope forceCaliVal1 == intercept
                 double forceMeasurement = forceCaliVal0 * forceVoltage + forceCaliVal1;
 
@@ -1415,7 +1433,6 @@ public class BluetoothLeService {
         //So if the second value is negative, then it is actually negative.
         int tens = adcRawVal[1];
         double rawVal = digits + tens*256;
-        Log.v("digits, tens, rawVal",digits+" "+tens+" "+rawVal);
         switch (sensorType){
             case batterySensor:
                 resultVoltage = 4.36 * (0.6 - (rawVal/41260.0) * 2.4);
@@ -1431,7 +1448,6 @@ public class BluetoothLeService {
 
             case temperatureSensor:
                 resultVoltage = 401 * (0.6 - (rawVal/41260.0) * 2.4) - 267;
-                Log.v("resultTemp",resultVoltage+" ℃");
                 break;
         }
         if (resultVoltage>0)
@@ -1630,12 +1646,11 @@ public class BluetoothLeService {
         }
     }
 
-    public void setDeviceWakeupTime(int[] array) {
+    public void setDeviceWakeupTime(byte[] array) {
         BluetoothGattCharacteristic characteristic = mBluetoothGatt.getService(UUID_LNG_TRM_SERV).getCharacteristic(UUID_LNG_TRM_DATE);
         if (characteristic != null) {
             try{
-                byte[] dateTime = new byte[]{0,0,(byte)array[0],(byte)array[1],(byte)array[2],(byte)array[3]};
-                characteristic.setValue(dateTime);
+                characteristic.setValue(array);
                 mBluetoothGatt.writeCharacteristic(characteristic);
             }catch (Exception e) {
                 makeToast("Set device time failed. Please connect again and try.");
@@ -1800,6 +1815,9 @@ public class BluetoothLeService {
     public int getDeviceInfoVal(){return deviceInfoVal;}
     public static BluetoothLeService getmBluetoothLeService() {
         return mBluetoothLeService;
+    }
+    public int getDeviceVersionVal() {
+        return deviceVersionVal;
     }
 }
 

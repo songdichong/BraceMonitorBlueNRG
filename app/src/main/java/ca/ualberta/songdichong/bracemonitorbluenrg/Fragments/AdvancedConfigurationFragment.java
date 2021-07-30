@@ -446,7 +446,6 @@ public class    AdvancedConfigurationFragment extends PreferenceFragment {
         Button button = (Button) layout.findViewById(R.id.confirm);
         if (mode == 0){
             //calibration mode
-
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

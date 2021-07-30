@@ -20,7 +20,8 @@
             android:ems="10"
             android:enabled="true"
             android:hint="low threshold"
-            android:inputType="numberDecimal"
+            android:inputType="numberSigned|numberDecimal"
+            android:digits="0123456789.-"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp" />
@@ -32,7 +33,8 @@
             android:ems="10"
             android:enabled="true"
             android:hint="high thresold"
-            android:inputType="numberDecimal"
+            android:inputType="numberSigned|numberDecimal"
+            android:digits="0123456789.-"
             android:layout_centerHorizontal="true"
             android:layout_below="@+id/first_input"/>
 

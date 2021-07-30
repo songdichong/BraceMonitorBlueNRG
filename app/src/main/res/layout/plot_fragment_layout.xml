@@ -18,7 +18,7 @@
             <Button
                 android:id="@+id/start_sampling"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
                 android:layout_weight="1"
                 android:enabled="false"
                 android:text="Start\nSampling" />
@@ -26,24 +26,34 @@
             <Button
                 android:id="@+id/stop_sampling"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
                 android:layout_weight="1"
                 android:enabled="false"
                 android:text="Stop\nSampling" />
+
             <Button
                 android:id="@+id/set_target"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
                 android:layout_weight="1"
                 android:enabled="false"
                 android:text="Set\nTarget" />
+
             <Button
                 android:id="@+id/save_real_time_data"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
                 android:layout_weight="1"
                 android:enabled="true"
                 android:text="Save\nData" />
+
+            <Button
+                android:id="@+id/start_real_time"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:enabled="true"
+                android:text="Start\nReal\nTime" />
         </LinearLayout>
 
 <!--        <ProgressBar-->
@@ -69,32 +79,33 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
-    <com.androidplot.xy.XYPlot
-        android:id="@+id/dynamicXYPlot"
-        androidPlot.domainLabel="Domain"
-        androidPlot.domainLabelWidget.labelPaint.textSize="14dp"
-        androidPlot.graphWidget.domainLabelPaint.textSize="14dp"
-        androidPlot.graphWidget.domainOriginLabelPaint.textSize="14dp"
-        androidPlot.graphWidget.marginBottom="25dp"
-        androidPlot.graphWidget.marginLeft="15dp"
-        androidPlot.graphWidget.marginRight="10dp"
-        androidPlot.graphWidget.marginTop="20dp"
-        androidPlot.graphWidget.rangeLabelPaint.textSize="14dp"
-        androidPlot.graphWidget.rangeOriginLabelPaint.textSize="14dp"
-        androidPlot.legendWidget.heightMetric.value="25dp"
-        androidPlot.legendWidget.iconSizeMetrics.heightMetric.value="15dp"
-        androidPlot.legendWidget.iconSizeMetrics.widthMetric.value="15dp"
-        androidPlot.legendWidget.positionMetrics.anchor="right_bottom"
-        androidPlot.legendWidget.textPaint.textSize="14dp"
-        androidPlot.rangeLabel="Range"
-        androidPlot.rangeLabelWidget.labelPaint.textSize="14dp"
-        androidPlot.title=""
-        androidPlot.titleWidget.labelPaint.textSize="15dp"
-        androidplot.renderMode="use_background_thread"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
 
-    <LinearLayout
+        <com.androidplot.xy.XYPlot
+            android:id="@+id/dynamicXYPlot"
+            androidPlot.domainLabel="Domain"
+            androidPlot.domainLabelWidget.labelPaint.textSize="14dp"
+            androidPlot.graphWidget.domainLabelPaint.textSize="14dp"
+            androidPlot.graphWidget.domainOriginLabelPaint.textSize="14dp"
+            androidPlot.graphWidget.marginBottom="25dp"
+            androidPlot.graphWidget.marginLeft="15dp"
+            androidPlot.graphWidget.marginRight="10dp"
+            androidPlot.graphWidget.marginTop="20dp"
+            androidPlot.graphWidget.rangeLabelPaint.textSize="14dp"
+            androidPlot.graphWidget.rangeOriginLabelPaint.textSize="14dp"
+            androidPlot.legendWidget.heightMetric.value="25dp"
+            androidPlot.legendWidget.iconSizeMetrics.heightMetric.value="15dp"
+            androidPlot.legendWidget.iconSizeMetrics.widthMetric.value="15dp"
+            androidPlot.legendWidget.positionMetrics.anchor="right_bottom"
+            androidPlot.legendWidget.textPaint.textSize="14dp"
+            androidPlot.rangeLabel="Range"
+            androidPlot.rangeLabelWidget.labelPaint.textSize="14dp"
+            androidPlot.title=""
+            androidPlot.titleWidget.labelPaint.textSize="15dp"
+            androidplot.renderMode="use_background_thread"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
+
+        <LinearLayout
         android:id="@+id/plot_info_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

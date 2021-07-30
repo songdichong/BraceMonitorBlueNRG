@@ -108,6 +108,8 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
             mBluetoothLeService = BluetoothLeService.getmBluetoothLeService();
             mBluetoothLeService.setContext(this);
             startScanFragment();
+        }else {
+            restart();
         }
     }
 

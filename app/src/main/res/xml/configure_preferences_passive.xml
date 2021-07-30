@@ -9,14 +9,22 @@
             android:key="sampling_rate"
             android:title="Sampling Rate"
             android:summary="Unit: minute per sample."/>
-        <Preference
-            android:key="sleep_wake_time"
-            android:title= "Set Sleep and Wakeup Time"
+        <ListPreference
+            android:key="sleep_time"
+            android:title = "Set Sleep Time"
+            android:entries="@array/time"
+            android:entryValues="@array/time"
+            android:enabled="false"/>
+        <ListPreference
+            android:key="wake_time"
+            android:title = "Set Wake-up Time"
+            android:entries="@array/time"
+            android:entryValues="@array/time"
             android:enabled="false"/>
         <Preference
             android:key="save"
             android:title="Save"
-            android:summary="Save subject ID, target force and sample rate."/>
+            android:summary="Save subject ID, sleep time, wake-up time, target force and sample rate."/>
         <Preference
             android:key="start_long_term"
             android:title="Start Long Term Sampling" />

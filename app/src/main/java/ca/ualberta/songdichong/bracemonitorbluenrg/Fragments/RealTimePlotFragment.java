@@ -18,6 +18,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.text.InputType;
 import android.text.format.DateFormat;
@@ -83,7 +84,7 @@ public class RealTimePlotFragment extends Fragment {
     private SampleDynamicXYDatasource data;
     private List<RealTimeData> realTimeDataList = new ArrayList<>();
     Button setTargetForce;
-
+    double max=0;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -93,6 +94,7 @@ public class RealTimePlotFragment extends Fragment {
         final Button stopSampling = rootView.findViewById(R.id.stop_sampling);
         setTargetForce  = rootView.findViewById(R.id.set_target);
         final Button saveRealTimeDataButton = rootView.findViewById(R.id.save_real_time_data);
+        final Button startLongTerm = rootView.findViewById(R.id.start_real_time);
         if (BluetoothLeService.calibrated && BluetoothLeService.connected) {
             startSampling.setEnabled(true);
             stopSampling.setEnabled(true);
@@ -122,6 +124,32 @@ public class RealTimePlotFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 showUploadDialog();
+            }
+        });
+        startLongTerm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage("Are you sure you want to begin long-term sampling?")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                if (BluetoothLeService.calibrated) {
+                                    mBluetoothLeService.startLongTerm();
+                                } else {
+                                    Toast.makeText(getActivity(), "Device not calibrated!", Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        })
+                        .setTitle("Confirm")
+                        .setIcon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
+                AlertDialog alert = builder.create();
+                alert.show();
             }
         });
         dynamicPlot = (XYPlot) rootView.findViewById(R.id.dynamicXYPlot);
@@ -165,7 +193,7 @@ public class RealTimePlotFragment extends Fragment {
         dynamicPlot.getBackgroundPaint().setColor(Color.TRANSPARENT);
         dynamicPlot.getGraphWidget().getBackgroundPaint().setColor(Color.TRANSPARENT);
         dynamicPlot.getBorderPaint().setColor(Color.TRANSPARENT);
-        dynamicPlot.setRangeLabel("Force (N)");
+
         dynamicPlot.getLayoutManager().remove(dynamicPlot.getLegendWidget());
         // create a dash effect for domain and range grid lines:
         DashPathEffect dashFx = new DashPathEffect(
@@ -194,6 +222,11 @@ public class RealTimePlotFragment extends Fragment {
         intentFilter.addAction(Constants.ACTION_FORCE_UPDATE);
         intentFilter.addAction(Constants.ACTION_GATT_DISCONNECTED);
         getActivity().getApplicationContext().registerReceiver(updateReceiver, intentFilter);
+        dynamicPlot.setRangeLabel("Force (N)");
+        if (mBluetoothLeService.getDeviceInfoVal() == Constants.activeBraceMonitor){
+            dynamicPlot.setRangeLabel("Pressure (mmHg)");
+        }
+
         if (mBluetoothLeService.adjustmentEnabled){
 //            setTargetForce.setBackgroundResource(R.drawable.green_rectangle_button);
             setTargetForce.getBackground().setColorFilter(new PorterDuffColorFilter(getResources().getColor(R.color.green_color), PorterDuff.Mode.MULTIPLY));
@@ -245,6 +278,7 @@ public class RealTimePlotFragment extends Fragment {
     public void onPause() {
         super.onPause();
         getActivity().getApplicationContext().unregisterReceiver(updateReceiver);
+
     }
 
     public final BroadcastReceiver updateReceiver = new BroadcastReceiver() {
@@ -315,7 +349,6 @@ public class RealTimePlotFragment extends Fragment {
             }
 
             if (forceMeasurement<0) {forceMeasurement = 0;}
-
             if (phase == SAMPLE_SIZE) {
                 for (int i = 0; i < SAMPLE_SIZE - 1; i++) {
                     forceArray[i] = forceArray[i + 1];
@@ -325,6 +358,8 @@ public class RealTimePlotFragment extends Fragment {
                 forceArray[phase] = forceMeasurement;
                 phase++;
             }
+            max = Math.max(max,forceMeasurement);
+
             RealTimeData realTimeData = new RealTimeData(Calendar.getInstance().getTime(), forceMeasurement);
             realTimeDataList.add(realTimeData);
             currentForce = forceMeasurement;
@@ -333,9 +368,7 @@ public class RealTimePlotFragment extends Fragment {
             notifier.notifyObservers();
 
 
-            if (forceMeasurement > 5){
-                dynamicPlot.setRangeBoundaries(0, 10, BoundaryMode.FIXED);
-            }
+            dynamicPlot.setRangeBoundaries(0, 5*(int)(max/5+1), BoundaryMode.FIXED);
         }
 
 
@@ -347,6 +380,7 @@ public class RealTimePlotFragment extends Fragment {
             double slope = forceCalibration[0];
             double intercept = forceCalibration[1];
             double forceMeasurement = slope * adcVoltage + intercept;
+
             if (phase == SAMPLE_SIZE) {
                 for (int i = 0; i < SAMPLE_SIZE - 1; i++) {
                     forceArray[i] = forceArray[i + 1];
@@ -356,6 +390,8 @@ public class RealTimePlotFragment extends Fragment {
                 forceArray[phase] = forceMeasurement;
                 phase++;
             }
+            max = Math.max(max,forceMeasurement);
+
             RealTimeData realTimeData = new RealTimeData(Calendar.getInstance().getTime(), forceMeasurement);
             realTimeDataList.add(realTimeData);
             currentForce = forceMeasurement;
@@ -363,9 +399,7 @@ public class RealTimePlotFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.force_value_popup)).setText(pressureString);
             notifier.notifyObservers();
 
-            if (forceMeasurement > 100){
-                dynamicPlot.setRangeBoundaries(0, 200, BoundaryMode.FIXED);
-            }
+            dynamicPlot.setRangeBoundaries(0, 10*(int)(max/10+1), BoundaryMode.FIXED);
         }
 
         public int getItemCount() {

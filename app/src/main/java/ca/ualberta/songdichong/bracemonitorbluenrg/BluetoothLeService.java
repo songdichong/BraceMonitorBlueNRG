@@ -315,6 +315,7 @@ public class BluetoothLeService {
             connected = false;
             calibrated = false;
             realTimeSampling = false;
+            adjustmentEnabled = false;
             mBluetoothGatt.close();
             broadcastUpdate(ACTION_GATT_DISCONNECTED,"Disconnected");
         }
@@ -444,9 +445,9 @@ public class BluetoothLeService {
                                 } else{
                                     if (deviceInfoVal == activeBraceMonitor){
                                         byte[] tempCali = new byte[]{characteristic.getValue()[0],characteristic.getValue()[1]};
-                                        tempCaliADCVal = convertADC(tempCali, ADC_Input_AdcPin2);
+                                        tempCaliADCVal = convertADC(tempCali, temperatureSensor);
                                         tempCaliRealVal =  characteristic.getValue()[2];
-                                        makeToast("Device temperature is calibrated as:" + String.format("%.2f",tempCaliADCVal) + " V -- "+ tempCaliRealVal + " ℃");
+                                        makeToast("Device temperature is calibrated as:" + String.format("%.2f",tempCaliADCVal) + " ℃ -- "+ tempCaliRealVal + " ℃");
                                     }else{
                                         byte[] tempCali = new byte[]{characteristic.getValue()[0],characteristic.getValue()[1]};
                                         tempCaliADCVal = convertADC(tempCali, ADC_Input_AdcPin2);
@@ -583,7 +584,7 @@ public class BluetoothLeService {
                     else if (characteristic.getUuid().equals(UUID_TEMP_VALUE)){
                         if (deviceInfoVal == activeBraceMonitor){
                             double temperature = convertADC(characteristic.getValue(), temperatureSensor);
-                            Log.v("temperature",String.valueOf(temperature));
+                            temperature = temperature + (tempCaliRealVal-tempCaliADCVal);
                             broadcastUpdate(ACTION_TEMP_UPDATE,temperature);
                         }else{
                             double tempADCVoltage = convertADC(characteristic.getValue(), ADC_Input_AdcPin2);

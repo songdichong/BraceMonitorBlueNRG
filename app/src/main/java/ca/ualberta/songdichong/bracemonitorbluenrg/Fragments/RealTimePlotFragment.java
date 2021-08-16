@@ -94,7 +94,7 @@ public class RealTimePlotFragment extends Fragment {
         final Button stopSampling = rootView.findViewById(R.id.stop_sampling);
         setTargetForce  = rootView.findViewById(R.id.set_target);
         final Button saveRealTimeDataButton = rootView.findViewById(R.id.save_real_time_data);
-        final Button startLongTerm = rootView.findViewById(R.id.start_real_time);
+        final Button startLongTerm = rootView.findViewById(R.id.start_long_time);
         if (BluetoothLeService.calibrated && BluetoothLeService.connected) {
             startSampling.setEnabled(true);
             stopSampling.setEnabled(true);

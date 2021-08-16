@@ -9,17 +9,13 @@
             android:key="sampling_rate"
             android:title="Sampling Rate"
             android:summary="Unit: minute per sample."/>
-        <ListPreference
+        <Preference
             android:key="sleep_time"
             android:title = "Set Sleep Time"
-            android:entries="@array/time"
-            android:entryValues="@array/time"
             android:enabled="false"/>
-        <ListPreference
+        <Preference
             android:key="wake_time"
             android:title = "Set Wake-up Time"
-            android:entries="@array/time"
-            android:entryValues="@array/time"
             android:enabled="false"/>
         <Preference
             android:key="save"

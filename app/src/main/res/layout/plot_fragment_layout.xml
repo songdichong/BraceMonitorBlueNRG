@@ -48,12 +48,12 @@
                 android:text="Save\nData" />
 
             <Button
-                android:id="@+id/start_real_time"
+                android:id="@+id/start_long_time"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:layout_weight="1"
                 android:enabled="true"
-                android:text="Start\nReal\nTime" />
+                android:text="Start\nLong\nTime" />
         </LinearLayout>
 
 <!--        <ProgressBar-->

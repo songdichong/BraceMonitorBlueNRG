@@ -84,29 +84,23 @@ public class ConfigureSensorFragment extends PreferenceFragment{
                 return true;
             }
         });
-        ListPreference setSleepButton = (ListPreference)findPreference("sleep_time");
+        Preference setSleepButton = findPreference("sleep_time");
         if (mBluetoothLeService.getDeviceInfoVal() == Constants.activeBraceMonitor){
             setSleepButton.setEnabled(true);
         }
-        setSleepButton.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                String values = newValue.toString();
-                byte[] sendingWake = new byte[]{(byte)0xFF,(byte)0xFF,Byte.parseByte(values),0,(byte)0xFF,(byte)0xFF};
-                mBluetoothLeService.setDeviceWakeupTime(sendingWake);
+        setSleepButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference preference) {
+                showTimePopup(1);
                 return true;
             }
         });
-        ListPreference setWakeButton = (ListPreference)findPreference("wake_time");
+        Preference setWakeButton = findPreference("wake_time");
         if (mBluetoothLeService.getDeviceInfoVal() == Constants.activeBraceMonitor){
             setWakeButton.setEnabled(true);
         }
-        setWakeButton.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                String values = newValue.toString();
-                byte[] sendingWake = new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,Byte.parseByte(values),0};
-                mBluetoothLeService.setDeviceWakeupTime(sendingWake);
+        setWakeButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference preference) {
+                showTimePopup(2);
                 return true;
             }
         });
@@ -195,4 +189,34 @@ public class ConfigureSensorFragment extends PreferenceFragment{
             }
         }
     };
+
+    private void showTimePopup(int sleepOrWake) {
+        //sleep
+        if (sleepOrWake == 1){
+            TimePickerDialog tpd = new TimePickerDialog(getActivity(),
+                    new TimePickerDialog.OnTimeSetListener() {
+                        @Override
+                        public void onTimeSet(TimePicker view, int hourOfDay,
+                                              int minute) {
+                            byte[] sendingWake = new byte[]{(byte)0xFF,(byte)0xFF, (byte)hourOfDay,(byte)minute,(byte)0xFF,(byte)0xFF};
+                            mBluetoothLeService.setDeviceWakeupTime(sendingWake);
+                        }
+                    }, 22,0, true);
+            tpd.show();
+        }
+
+        else if (sleepOrWake == 2){
+            TimePickerDialog tpd = new TimePickerDialog(getActivity(),
+                    new TimePickerDialog.OnTimeSetListener() {
+                        @Override
+                        public void onTimeSet(TimePicker view, int hourOfDay,
+                                              int minute) {
+                            byte[] sendingWake = new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte) hourOfDay, (byte) minute};
+                            mBluetoothLeService.setDeviceWakeupTime(sendingWake);
+                        }
+                    }, 8,0, true);
+            tpd.show();
+        }
+
+    }
 }

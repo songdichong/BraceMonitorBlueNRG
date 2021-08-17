@@ -29,6 +29,9 @@ public class Records {
     public int subjectNumber;
     public double targetForce;
     public int sampleRate;
+
+    public int targetPressure;
+    public int allowance;
     Integer longTermFlag;
     @Override
     public boolean equals(Object o) {
@@ -90,11 +93,23 @@ public class Records {
         this.targetForce = target_force;
         this.sampleRate = sampleRate;
     }
-
-
-    public String getHeaderString()
+    public Records(int subject_number, int targetPressure, int allowance, int sampleRate)
     {
-        return "Subject number: " + subjectNumber + " Target Force/Pressure: " + String.format("%.2f",targetForce) + " Sample rate: " + sampleRate + "\n";
+        this.isHeader = true;
+        this.subjectNumber = subject_number;
+        this.targetPressure = targetPressure;
+        this.allowance = allowance;
+        this.sampleRate = sampleRate;
+    }
+
+    public String getHeaderStringPassive()
+    {
+        return "Subject number: " + subjectNumber + " Target Force (N): " + String.format("%.2f",targetForce) + " Sample rate: " + sampleRate + "\n";
+    }
+
+    public String getHeaderStringActive()
+    {
+        return "Subject number: " + subjectNumber + " Target Pressure (mmHg): " + targetPressure +  " Allowance: " + allowance + " Sample rate: " + sampleRate + "\n";
     }
 
     public double getForceVal() {

@@ -1018,6 +1018,8 @@ public class BluetoothLeService {
      *
      * Output: None.
      * */
+    byte[] arrayBufferPassive = new byte[12];
+    int arrayBufferPassiveIndex = 0;
     public void FormatDownloadedData_External(byte[] arrays){
         int index = 0;
         int[] maxDays = {31,28,31,30,31,30,31,31,30,31,30,31};
@@ -1049,6 +1051,24 @@ public class BluetoothLeService {
                 index += 12;
                 //If all info are 0, that means date info is missing
             }
+
+            else if ((arrays[index] == -18) && (arrays[index+1] == -18)) {
+                // very unlucky as last couple bytes are header but not sent in same packet
+                while (index < arrays.length){
+                    arrayBufferPassive[arrayBufferPassiveIndex++] = arrays[index++];
+                }
+                shouldCheckArrayBuffer = true;
+            }
+
+            else if (shouldCheckArrayBuffer) {
+                shouldCheckArrayBuffer = false;
+                for (int i = arrayBufferPassiveIndex; i < 12; i++){
+                    arrayBufferPassive[i] = arrays[i-arrayBufferPassiveIndex];
+                }
+                FormatDownloadedData_External(arrayBufferPassive);
+                index += 12-arrayBufferPassiveIndex;
+            }
+
             else if ( (arrays[index] == -1) && (arrays[index+1] == -1)
                     && (arrays[index+2] == -1) && (arrays[index+3] == -1)){
                 //so reach the end, break immediately
@@ -1121,12 +1141,13 @@ public class BluetoothLeService {
         }
     }
 
-
+    byte[] arrayBufferActive = new byte[12];
+    boolean shouldCheckArrayBuffer = false;
     public void FormatDownloadedData_Active(byte[] arrays){
         int index = 0;
         int[] maxDays = {31,28,31,30,31,30,31,31,30,31,30,31};
-        while(index < arrays.length-1){
-            if ((arrays.length > (index+12)) && (arrays[index] == -18) && (arrays[index+1] == -18)){
+        while(index < arrays.length){
+            if ((arrays.length >= (index+12)) && (arrays[index] == -18) && (arrays[index+1] == -18)){
                 //So the next 6 bytes are time info: year month day hour minute sampleRate
                 //Then next 8 bytes are holder subject number MSD, holder LSD, target force digit, target force decimal
                 recordYear = arrays[index+2] + 2000;
@@ -1141,18 +1162,40 @@ public class BluetoothLeService {
                     //For test
                     sampleRate = 6;
                 }
-                Log.v("subject_number",String.valueOf(arrays[index+8]+" "+arrays[index+9]));
                 int subject_number_msd = arrays[index+8] >= 0 ? arrays[index+8]*256:(arrays[index+8]+256)*256;
                 int subject_number_lsd = arrays[index+9] >= 0 ? arrays[index+9]:(arrays[index+9]+256);
                 int subject_number =  subject_number_msd + subject_number_lsd;
-                int forceDigits =  arrays[index+10] >= 0 ? arrays[index+10]:arrays[index+10]+256;
-                int forceDecimals =  arrays[index+11] >= 0 ? arrays[index+11]:arrays[index+11]+256;
-                double target_force = forceDigits + forceDecimals*0.01;
-                Records records = new Records(subject_number, target_force, sampleRate);
+                int targetPressure =  arrays[index+10] >= 0 ? arrays[index+10]:arrays[index+10]+256;
+                int allowance =  arrays[index+11] >= 0 ? arrays[index+11]:arrays[index+11]+256;
+                Records records = new Records(subject_number, targetPressure, allowance, sampleRate);
+                byte[] arr = new byte[12];
+                for (int i = 0; i < 12; i++) {
+                    arr[i] = arrays[index+i];
+                }
+                Log.v("record header", Arrays.toString(arr));
                 downloadedData.add(records);
                 index += 12;
                 //If all info are 0, that means date info is missing
             }
+            else if ((arrays[index] == -18) && (arrays[index+1] == -18)) {
+                // very unlucky as last couple bytes are sent
+                // store in arrayBufferActive and check with next
+                for (int i = 0; i < 6; i++) {
+                    arrayBufferActive[i] = arrays[index+i];
+                }
+                shouldCheckArrayBuffer = true;
+                index += 6;
+            }
+
+            else if (shouldCheckArrayBuffer) {
+                shouldCheckArrayBuffer = false;
+                for (int i = 0; i < 6; i++){
+                    arrayBufferActive[i+6] = arrays[index+i];
+                }
+                FormatDownloadedData_Active(arrayBufferActive);
+                index += 6;
+            }
+
             else if ( (arrays[index] == -1) && (arrays[index+1] == -1)
                     && (arrays[index+2] == -1) && (arrays[index+3] == -1)){
                 stopDownloadData();
@@ -1165,7 +1208,11 @@ public class BluetoothLeService {
                 double temperature = convertADC(temperatureArray, temperatureSensor);
                 double forceVoltage = convertADC(forceArray, ADC_Input_AdcPin2);
                 int longTermFlag = (arrays[index+4] < 0? arrays[index+4] + 256 : arrays[index+4]) + arrays[index+5]*256;
-                Log.v("ltf",arrays[index+4]+" "+arrays[index+5]+" "+longTermFlag);
+                byte[] arr = new byte[6];
+                for (int i = 0; i < 6; i++) {
+                    arr[i] = arrays[index+i];
+                }
+                Log.v("record data", Arrays.toString(arr));
                 //forceCaliVal0 == slope forceCaliVal1 == intercept
                 double forceMeasurement = forceCaliVal0 * forceVoltage + forceCaliVal1;
 
@@ -1318,7 +1365,7 @@ public class BluetoothLeService {
             for (int i = 0; i < data.size(); i++) {
                 Records record = data.get(i);
                 if (record.isHeader){
-                    String output = record.getHeaderString();
+                    String output = record.getHeaderStringPassive();
                     out.write(output.getBytes());
                 }else{
                     String[] outputArray = new String[]{String.format("%.2f",record.getForceVal()),String.format("%.2f",record.getTempVal()),String.valueOf(record.getYear()),
@@ -1349,7 +1396,7 @@ public class BluetoothLeService {
             for (int i = 0; i < data.size(); i++) {
                 Records record = data.get(i);
                 if (record.isHeader){
-                    String output = record.getHeaderString();
+                    String output = record.getHeaderStringActive();
                     out.write(output.getBytes());
                 }else{
                     String[] outputArray = new String[]{String.format("%.2f",record.getForceVal()),String.format("%.2f",record.getTempVal()),String.valueOf(record.getLongTermFlag()),String.valueOf(record.getYear()),
@@ -1438,7 +1485,7 @@ public class BluetoothLeService {
             case batterySensor:
                 resultVoltage = 4.36 * (0.6 - (rawVal/41260.0) * 2.4);
                 break;
-                
+
             case ADC_Input_AdcPin2:
                 resultVoltage = 3 * (0.6 - (rawVal/41260.0) * 2.4);
                 break;

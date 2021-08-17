@@ -229,11 +229,10 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
                         emailIntent.setType("plain/text");
                         emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "ActiveBraceMonitorLog " + currentTime);
                         emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "");
-                        File attachment = new File(Environment.getExternalStorageDirectory(), Constants.FILENAME );
+                        File attachment = new File(Environment.getExternalStorageDirectory(), Constants.ACTIVE_FILENAME );
                         if (!attachment.exists() || !attachment.canRead()) {
                             Toast.makeText(getApplication(), "Attachment Error", Toast.LENGTH_SHORT).show();
                         } else {
-                            Log.v("uri: ",getApplicationContext().getPackageName());
                             Uri uri = FileProvider.getUriForFile(getApplicationContext(),"ca.ualberta.songdichong.bracemonitorbluenrg.fileprovider", attachment);
                             emailIntent.putExtra(Intent.EXTRA_STREAM, uri);
                             try {
@@ -255,7 +254,6 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
                         if (!attachment.exists() || !attachment.canRead()) {
                             Toast.makeText(getApplication(), "Attachment Error", Toast.LENGTH_SHORT).show();
                         } else {
-                            Log.v("uri: ",getApplicationContext().getPackageName());
                             Uri uri = FileProvider.getUriForFile(getApplicationContext(),"ca.ualberta.songdichong.bracemonitorbluenrg.fileprovider", attachment);
                             emailIntent.putExtra(Intent.EXTRA_STREAM, uri);
                             try {

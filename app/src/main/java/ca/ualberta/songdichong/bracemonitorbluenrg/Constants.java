@@ -38,9 +38,9 @@ public class Constants {
     public static final UUID UUID_DEVICEINFO_VAL            = UUID.fromString("00002B0F-0000-1000-8000-00805f9b34fb");
     public static final UUID UUID_DEVICE_VERSION_VAL        = UUID.fromString("00002B1F-0000-1000-8000-00805f9b34fb");
 
-    public static final String FILENAME = "BraceMonitorLog.txt";
-    public static final String REALTIMEDATAFILENAME = "RealTimeData.txt";
-    public static final String ACTIVE_FILENAME = "ActiveBraceMonitorLog.txt";
+    public static final String FILENAME = "BraceMonitorLog.csv";
+    public static final String REALTIMEDATAFILENAME = "RealTimeData.csv";
+    public static final String ACTIVE_FILENAME = "ActiveBraceMonitorLog.csv";
     public static final String ACTION_GATT_CONNECTED = "ca.ualberta.songdichong.bracemonitorbluenrg.ACTION_GATT_CONNECTED";
     public static final String ACTION_GATT_DISCONNECTED = "ca.ualberta.songdichong.bracemonitorbluenrg.ACTION_GATT_DISCONNECTED";
     public static final String ACTION_GATT_SCAN_COMPLETE = "ca.ualberta.songdichong.bracemonitorbluenrg.ACTION_SCAN_COMPLETE";

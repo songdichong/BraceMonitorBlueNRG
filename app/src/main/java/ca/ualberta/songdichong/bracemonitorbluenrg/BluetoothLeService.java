@@ -1336,7 +1336,7 @@ public class BluetoothLeService {
     }
 
     public void writeFileToDiskForActive(String deviceName) {
-        File file = new File(Environment.getExternalStorageDirectory(), FILENAME);
+        File file = new File(Environment.getExternalStorageDirectory(), ACTIVE_FILENAME);
         if (file.exists()) {
             deleteFile();
         }

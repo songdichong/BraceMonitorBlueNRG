@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.TimePickerDialog;
+import android.bluetooth.BluetoothGatt;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -62,6 +63,7 @@ public class ConfigureDrawerFragment extends Fragment {
     int endMinuteofHour;
     double force = 1.00;
     double temperature = 28.0;
+    BluetoothLeService bluetoothLeService = BluetoothLeService.getmBluetoothLeService();
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -79,7 +81,8 @@ public class ConfigureDrawerFragment extends Fragment {
         drawAvgForcePlotButton = rootView.findViewById(R.id.draw_avg_force_plot_button);
         drawAvgTemperaturePlotBUtton = rootView.findViewById(R.id.draw_avg_temperature_plot_button);
 
-        if (BluetoothLeService.downloadedData.size() == 0){
+
+        if (BluetoothLeService.downloadedData.size() == 0 ){
             Log.v("123","0");
             File file = new File(Environment.getExternalStorageDirectory(), Constants.FILENAME);
             analyzer = new Analyzer(file);
@@ -120,7 +123,9 @@ public class ConfigureDrawerFragment extends Fragment {
                     referenceTemperatureValue.setText(String.format("%.1f",temperature));
                 }
             });
-
+            if (bluetoothLeService.getDeviceInfoVal() == Constants.activeBraceMonitor){
+                return rootView;
+            }
             drawForcePlotButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -143,6 +148,7 @@ public class ConfigureDrawerFragment extends Fragment {
                         Toast.makeText(getContext(), "Date selection is invalid.", Toast.LENGTH_LONG).show();
                     }else{
                         intent.putExtra("startEndIndex",startEndIndex);
+
                         startActivity(intent);
                     }
                 }

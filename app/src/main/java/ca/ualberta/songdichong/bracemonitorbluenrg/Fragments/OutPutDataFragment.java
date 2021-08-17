@@ -41,7 +41,7 @@ public class OutPutDataFragment extends PreferenceFragment {
     private PopupWindow popupWindowDownloading;
     Thread currentThread = null;
     private Handler handler;
-
+    TextView versionText;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -105,6 +105,7 @@ public class OutPutDataFragment extends PreferenceFragment {
         batteryText = (TextView) v.findViewById(R.id.battery_value);
         temperatureText = (TextView) v.findViewById(R.id.temperature_value);
         deviceName = (TextView) v.findViewById(R.id.device_name);
+        versionText = (TextView) v.findViewById(R.id.version_value);
         return v;
     }
 
@@ -113,7 +114,7 @@ public class OutPutDataFragment extends PreferenceFragment {
         super.onResume();
         batteryText.setText(String.format("%.2f",mBluetoothLeService.batteryVal) + "V");
         deviceName.setText(mBluetoothLeService.deviceName);
-
+        versionText.setText("v"+mBluetoothLeService.getDeviceVersionVal());
         IntentFilter filter = new IntentFilter();
         filter.addAction(Constants.ACTION_TEMP_UPDATE);
         filter.addAction(Constants.ACTION_DATA_DOWNLOAD);

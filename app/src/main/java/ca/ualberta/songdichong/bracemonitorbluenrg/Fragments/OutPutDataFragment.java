@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -148,7 +149,7 @@ public class OutPutDataFragment extends PreferenceFragment {
                                 }
                             }
                         };
-                        handler.postDelayed(r, 500);
+                        handler.postDelayed(r, 3000);
                     }
 
                     for (int i = currentIndex; i < downloadedData.size()-1; i++) {
@@ -195,6 +196,7 @@ public class OutPutDataFragment extends PreferenceFragment {
             else if (Constants.ACTION_DATA_DOWNLOAD.equals(action)) {
                 if (getActivity() != null) {
                     downloadedData = mBluetoothLeService.downloadedData;
+                    Log.v("downloadedData",downloadedData.size()+" ");
                     if(popupWindowDownloading == null){
                         showDownloadingDialogue("Downloading");
                     }

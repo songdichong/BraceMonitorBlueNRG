@@ -325,6 +325,7 @@ public class BluetoothLeService {
      *
      * Object Detail: The callback of bluetooth. Refer to the top of this page.
      */
+
     private final BluetoothGattCallback mGattCallback =
             new BluetoothGattCallback() {
                 @Override
@@ -441,6 +442,9 @@ public class BluetoothLeService {
                                 byte[] emptyArray = new byte[]{-1,-1,-1,-1};
                                 if (Arrays.equals(characteristic.getValue(),emptyArray))
                                 {
+                                    if (deviceInfoVal == activeBraceMonitor){
+                                        tempCaliADCVal = 23;
+                                    }
                                     makeToast("Device Temperature Is Not Calibrated");
                                 } else{
                                     if (deviceInfoVal == activeBraceMonitor){
@@ -999,7 +1003,7 @@ public class BluetoothLeService {
                 BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID_DOWNLOAD_VALUE);
                 mBluetoothGatt.setCharacteristicNotification(characteristic, false);
                 BluetoothGattDescriptor desc = characteristic.getDescriptor(CONFIG_DESCRIPTOR);
-                desc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                desc.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
                 mBluetoothGatt.writeDescriptor(desc);
             }
             catch (Exception e){
@@ -1039,7 +1043,6 @@ public class BluetoothLeService {
                     //For test
                     sampleRate = 6;
                 }
-                Log.v("subject_number",String.valueOf(arrays[index+8]+" "+arrays[index+9]));
                 int subject_number_msd = arrays[index+8] >= 0 ? arrays[index+8]*256:(arrays[index+8]+256)*256;
                 int subject_number_lsd = arrays[index+9] >= 0 ? arrays[index+9]:(arrays[index+9]+256);
                 int subject_number =  subject_number_msd + subject_number_lsd;
@@ -1168,11 +1171,7 @@ public class BluetoothLeService {
                 int targetPressure =  arrays[index+10] >= 0 ? arrays[index+10]:arrays[index+10]+256;
                 int allowance =  arrays[index+11] >= 0 ? arrays[index+11]:arrays[index+11]+256;
                 Records records = new Records(subject_number, targetPressure, allowance, sampleRate);
-                byte[] arr = new byte[12];
-                for (int i = 0; i < 12; i++) {
-                    arr[i] = arrays[index+i];
-                }
-                Log.v("record header", Arrays.toString(arr));
+
                 downloadedData.add(records);
                 index += 12;
                 //If all info are 0, that means date info is missing
@@ -1197,7 +1196,8 @@ public class BluetoothLeService {
             }
 
             else if ( (arrays[index] == -1) && (arrays[index+1] == -1)
-                    && (arrays[index+2] == -1) && (arrays[index+3] == -1)){
+                    && (arrays[index+2] == -1) && (arrays[index+3] == -1) && (arrays[index+4] == -1)
+                    && (arrays[index+5] == -1)){
                 stopDownloadData();
                 break;
             }
@@ -1208,11 +1208,6 @@ public class BluetoothLeService {
                 double temperature = convertADC(temperatureArray, temperatureSensor);
                 double forceVoltage = convertADC(forceArray, ADC_Input_AdcPin2);
                 int longTermFlag = (arrays[index+4] < 0? arrays[index+4] + 256 : arrays[index+4]) + arrays[index+5]*256;
-                byte[] arr = new byte[6];
-                for (int i = 0; i < 6; i++) {
-                    arr[i] = arrays[index+i];
-                }
-                Log.v("record data", Arrays.toString(arr));
                 //forceCaliVal0 == slope forceCaliVal1 == intercept
                 double forceMeasurement = forceCaliVal0 * forceVoltage + forceCaliVal1;
 

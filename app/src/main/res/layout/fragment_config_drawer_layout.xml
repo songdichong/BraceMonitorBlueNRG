@@ -147,11 +147,20 @@
             android:background="@color/blue_color" />
 
         <Button
+            android:id="@+id/draw_force_temperature_plot_button"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="Force and Temperature Compliance"
+            android:layout_below="@+id/draw_temperature_plot_button"
+            android:layout_alignStart="@+id/draw_force_plot_button"
+            android:background="@color/yellow_color" />
+
+        <Button
             android:id="@+id/draw_avg_force_plot_button"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:text="Daily Force Average"
-            android:layout_below="@+id/draw_temperature_plot_button"
+            android:layout_below="@+id/draw_force_temperature_plot_button"
             android:layout_alignStart="@+id/draw_force_plot_button"
             android:background="@color/green_color" />
 

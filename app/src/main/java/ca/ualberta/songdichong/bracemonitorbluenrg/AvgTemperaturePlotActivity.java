@@ -24,14 +24,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Analyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Days;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Records;
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.TimeWithinDay;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Fragments.ConfigureDrawerFragment;
 
 
 public class AvgTemperaturePlotActivity extends Activity {
-    Map<int[], List<Double>> DailyTemperatures = new HashMap<>();
+    Map<TimeWithinDay, List<Double>> DailyTemperatures = new HashMap<>();
     double max = 0.0;
     List<Date> xAxis = new ArrayList<>();
     List<Double> yAxis = new ArrayList<>();
+    Date startTime;
+    Date endTime;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,8 +62,6 @@ public class AvgTemperaturePlotActivity extends Activity {
 
     public void myChartSettings(XYMultipleSeriesRenderer renderer) {
         renderer.setChartTitle("Daily Average Temperature Values");
-        Date startTime = new Date(2020,1,1);
-        Date endTime = new Date(2020,1,2);
         renderer.setXAxisMin(startTime.getTime());
         Log.v("start",String.valueOf(startTime.getTime()));
         renderer.setXAxisMax(endTime.getTime());
@@ -107,37 +108,23 @@ public class AvgTemperaturePlotActivity extends Activity {
         int[] startEndIndex = getIntent().getIntArrayExtra("startEndIndex");
         int start = startEndIndex[0];
         int end  = startEndIndex[1];
-        AtomicInteger counter = new AtomicInteger();
-        for (Days days:analyzer.getMyDaysList()){
-            for (Records rec:days.getRecordsList())
-            {
-                if (counter.get() >=start && counter.get() <end)
-                {
-                    if (DailyTemperatures.containsKey(rec.time))
-                    {
-                        List<Double> vals =  DailyTemperatures.get(rec.time);
-                        vals.add(rec.getTempVal());
-                        DailyTemperatures.put(rec.time,vals);
-                    }
-                    else{
-                        Double temperature = rec.getTempVal();
-                        List<Double> vals = new ArrayList<Double>();
-                        vals.add(temperature);
-                        DailyTemperatures.put(rec.time,vals);
-                    }
-                }
-                counter.getAndIncrement();
+        List<Records> recordsList = analyzer.getMyRecordsList();
+        for (int counter = start; counter < end; counter++){
+            Records rec = recordsList.get(counter);
+            if (!rec.isHeader){
+                List<Double> vals =DailyTemperatures.getOrDefault(new TimeWithinDay(rec.time),new ArrayList<Double>());
+                vals.add(rec.getTempVal());
+                DailyTemperatures.put(new TimeWithinDay(rec.time),vals);
             }
         }
-        Map<Date,  Double> sortedEntry = new TreeMap<>();
-        for (Map.Entry<int[], List<Double>> entry : DailyTemperatures.entrySet()) {
-            Date dt = new Date(2020,1,1,entry.getKey()[0],entry.getKey()[1]);
+        startTime = new Date(recordsList.get(start).getYear()-1900,recordsList.get(start).getMonth()-1,recordsList.get(start).getDate());
+        endTime = new Date(recordsList.get(start).getYear()-1900,recordsList.get(start).getMonth()-1,recordsList.get(start).getDate()+1);
+        for (Map.Entry<TimeWithinDay, List<Double>> entry : DailyTemperatures.entrySet()) {
+            Date dt = new Date(recordsList.get(start).getYear()-1900,recordsList.get(start).getMonth()-1,
+                    recordsList.get(start).getDate(),entry.getKey().getHour(),entry.getKey().getMin());
             Double averageY = calculateAverage(entry.getValue());
-            sortedEntry.put(dt,averageY);
-        }
-        for (Map.Entry<Date, Double> entry:sortedEntry.entrySet()){
-            xAxis.add(entry.getKey());
-            yAxis.add(entry.getValue());
+            xAxis.add(dt);
+            yAxis.add(averageY);
         }
         for (Double y:yAxis){
             if (max<y) max = y;

@@ -25,6 +25,7 @@
         <activity android:name="org.achartengine.GraphicalActivity" />
         <activity android:name="ca.ualberta.songdichong.bracemonitorbluenrg.ForcePlotActivity"/>
         <activity android:name="ca.ualberta.songdichong.bracemonitorbluenrg.TemperaturePlotActivity"/>
+        <activity android:name="ca.ualberta.songdichong.bracemonitorbluenrg.ForceTemperaturePlotActivity"/>
         <activity android:name="ca.ualberta.songdichong.bracemonitorbluenrg.AvgForcePlotActivity"/>
         <activity android:name="ca.ualberta.songdichong.bracemonitorbluenrg.AvgTemperaturePlotActivity"/>
         <provider

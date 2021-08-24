@@ -32,18 +32,21 @@ import ca.ualberta.songdichong.bracemonitorbluenrg.R;
 
 public class OutPutDataFragment extends PreferenceFragment {
     BluetoothLeService mBluetoothLeService;
-    int currentIndex = 0;
     TextView batteryText;
     TextView temperatureText;
     TextView deviceName;
+    TextView versionText;
+    TextView memoryText;
+
     private TextView mNumSamplesText;
     private List<Records> downloadedData = new ArrayList<>();
 
     private PopupWindow popupWindowDownloading;
     Thread currentThread = null;
     private Handler handler;
-    TextView versionText;
 
+    double downloadedSize;
+    double totalSize;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +57,6 @@ public class OutPutDataFragment extends PreferenceFragment {
         startFullDownload.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
                 mBluetoothLeService.downloadData();
-                currentIndex = 0;
                 return true;
             }
         });
@@ -81,7 +83,6 @@ public class OutPutDataFragment extends PreferenceFragment {
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 mBluetoothLeService.eraseAllFlash();
-                                currentIndex = 0;
                             }
                         })
                         .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -107,6 +108,7 @@ public class OutPutDataFragment extends PreferenceFragment {
         temperatureText = (TextView) v.findViewById(R.id.temperature_value);
         deviceName = (TextView) v.findViewById(R.id.device_name);
         versionText = (TextView) v.findViewById(R.id.version_value);
+        memoryText = (TextView) v.findViewById(R.id.memory_value);
         return v;
     }
 
@@ -116,10 +118,16 @@ public class OutPutDataFragment extends PreferenceFragment {
         batteryText.setText(String.format("%.2f",mBluetoothLeService.batteryVal) + "V");
         deviceName.setText(mBluetoothLeService.deviceName);
         versionText.setText("v"+mBluetoothLeService.getDeviceVersionVal());
+        if (mBluetoothLeService.getTotalAddress() != Integer.MIN_VALUE) {
+            double percentage = ((double)mBluetoothLeService.getTotalAddress() / 0x3FFFFF * 100);
+            memoryText.setText(String.format("%.1f",percentage)+"%");
+        }
         IntentFilter filter = new IntentFilter();
         filter.addAction(Constants.ACTION_TEMP_UPDATE);
         filter.addAction(Constants.ACTION_DATA_DOWNLOAD);
         filter.addAction(Constants.ACTION_GATT_DISCONNECTED);
+        filter.addAction(Constants.ACTION_BATTERY_READ);
+        filter.addAction(Constants.ACTION_VERSION_UPDATE);
         filter.addAction(Constants.ACTION_DATA_ERASE);
         getActivity().getApplicationContext().registerReceiver(updateReceiver, filter);
     }
@@ -137,7 +145,14 @@ public class OutPutDataFragment extends PreferenceFragment {
             getActivity().runOnUiThread(new Runnable() {
                 public void run() {
                     if (mNumSamplesText != null) {
-                        mNumSamplesText.setText("Downloading..." + downloadedData.size());
+                        totalSize = mBluetoothLeService.getTotalAddress();
+                        if (totalSize == Integer.MIN_VALUE) {
+                            mNumSamplesText.setText("Downloading..." + downloadedData.size());
+                        }
+                        else{
+                            Log.v("downloadedSize",downloadedSize+" "+totalSize);
+                            mNumSamplesText.setText("Downloading..." + (int)((downloadedSize/totalSize)*100) +" %");
+                        }
                         if (handler != null) {
                             handler.removeCallbacksAndMessages(null);
                         }
@@ -150,13 +165,6 @@ public class OutPutDataFragment extends PreferenceFragment {
                             }
                         };
                         handler.postDelayed(r, 3000);
-                    }
-
-                    for (int i = currentIndex; i < downloadedData.size()-1; i++) {
-                        currentIndex ++;
-                        if (Thread.interrupted()) {
-                            return;
-                        }
                     }
                 }
             });
@@ -192,11 +200,28 @@ public class OutPutDataFragment extends PreferenceFragment {
                     ((MainActivity)getActivity()).restart();
                 }
             }
+            
+            else if (Constants.ACTION_BATTERY_READ.equals(action)) {
+                double batt = intent.getDoubleExtra(Constants.ACTION_BATTERY_READ,0);
+                batteryText.setText(String.format("%.2f",batt) + "V");
+            }
+
+            else if (Constants.ACTION_VERSION_UPDATE.equals(action)) {
+                int version = intent.getIntExtra("version",0);
+                int address = intent.getIntExtra("address", 0);
+                versionText.setText("v"+version);
+                if (mBluetoothLeService.getTotalAddress() != Integer.MIN_VALUE) {
+                    double percentage = ((double)address / 0x3FFFFF * 100);
+                    memoryText.setText(String.format("%.1f",percentage)+"%");
+                }
+            }
 
             else if (Constants.ACTION_DATA_DOWNLOAD.equals(action)) {
+                double length = intent.getDoubleExtra("downloadVal",0);
+                downloadedSize += length;
+                Log.v("downloadedSize",downloadedSize+"");
                 if (getActivity() != null) {
                     downloadedData = mBluetoothLeService.downloadedData;
-                    Log.v("downloadedData",downloadedData.size()+" ");
                     if(popupWindowDownloading == null){
                         showDownloadingDialogue("Downloading");
                     }

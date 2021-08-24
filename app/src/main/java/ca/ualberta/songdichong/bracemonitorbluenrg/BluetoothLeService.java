@@ -152,7 +152,7 @@ public class BluetoothLeService {
 
     private int deviceInfoVal = -1;
     private int deviceVersionVal = 0;
-
+    private int currentAddress = Integer.MIN_VALUE;
     static public List<Records> downloadedData = new ArrayList<>();
     public boolean adjustmentEnabled = false;
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -285,6 +285,7 @@ public class BluetoothLeService {
         scanner.stopScan(scan_callback);
         mScanning = false;
         initializing = true;
+        currentAddress = Integer.MIN_VALUE;
         BluetoothDevice device = mBluetoothDevices.get(deviceNum);
         if (initBluetooth()) {
             if (mBluetoothGatt == null) {
@@ -325,7 +326,7 @@ public class BluetoothLeService {
      *
      * Object Detail: The callback of bluetooth. Refer to the top of this page.
      */
-
+    List<byte[]> byteArrayList = new ArrayList<>();
     private final BluetoothGattCallback mGattCallback =
             new BluetoothGattCallback() {
                 @Override
@@ -410,7 +411,18 @@ public class BluetoothLeService {
                                     getBatteryLevel();
                                 }
                                 deviceVersionVal = characteristic.getValue()[0];
-                                Log.v("Version", String.valueOf(characteristic.getValue()[0]));
+                                if (characteristic.getValue().length > 1){
+                                    currentAddress = 0;
+                                    for (int i = 0; i < 4; i++){
+                                        int current = characteristic.getValue()[i+1];
+                                        if (current < 0) {
+                                            current+=256;
+                                        }
+                                        currentAddress += current << (8*i);
+                                    }
+                                }
+                                int[] array = new int[]{deviceVersionVal,currentAddress};
+                                broadcastUpdate(ACTION_VERSION_UPDATE,array);
                             }
                         }
 
@@ -428,6 +440,7 @@ public class BluetoothLeService {
                                 }else{
                                     batteryVal = convertADC(characteristic.getValue(),batterySensor);
                                 }
+                                broadcastUpdate(ACTION_BATTERY_READ,batteryVal);
                             }
                         }
 
@@ -573,6 +586,7 @@ public class BluetoothLeService {
                         }
                         else if (deviceInfoVal == activeBraceMonitor){
                             FormatDownloadedData_Active(characteristic.getValue());
+//                            byteArrayList.add(characteristic.getValue());
                         }
                         broadcastUpdate(ACTION_DATA_DOWNLOAD,characteristic.getValue().length);
                     }
@@ -1797,6 +1811,9 @@ public class BluetoothLeService {
         else if (ACTION_DATA_ERASE.equals(action)){
             intent.putExtra("erase",data);
         }
+        else if (ACTION_BATTERY_READ.equals(action)){
+            intent.putExtra(ACTION_BATTERY_READ,data);
+        }
         else{
             intent.putExtra("adcVoltage",data);
         }
@@ -1836,6 +1853,15 @@ public class BluetoothLeService {
         context.sendBroadcast(intent);
     }
 
+    private void broadcastUpdate(final String action, int[] data) {
+        Intent intent = new Intent(action);
+        if (ACTION_VERSION_UPDATE.equals(action)) {
+            intent.putExtra("version", data[0]);
+            intent.putExtra("address", data[1]);
+        }
+        context.sendBroadcast(intent);
+    }
+
     public void makeToast(final String message) {
         ((Activity) context).runOnUiThread(new Runnable() {
                     public void run() {
@@ -1861,6 +1887,9 @@ public class BluetoothLeService {
     }
     public int getDeviceVersionVal() {
         return deviceVersionVal;
+    }
+    public int getTotalAddress(){
+        return currentAddress;
     }
 }
 

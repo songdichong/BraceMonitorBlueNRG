@@ -23,6 +23,27 @@ public class Records {
     double forceVal;
     double tempVal;
 
+    public double getAverageForceVal() {
+        return averageForceVal;
+    }
+
+    public void setAverageForceVal(double averageForceVal) {
+        this.averageForceVal = averageForceVal;
+    }
+
+    double averageForceVal;
+
+    public double getAverageTempVal() {
+        return averageTempVal;
+    }
+
+    public void setAverageTempVal(double averageTempVal) {
+        this.averageTempVal = averageTempVal;
+    }
+
+    double averageTempVal;
+
+
     public int[] dateTime;
     public int[] time;
 
@@ -67,7 +88,9 @@ public class Records {
         this.hour = hour;
         this.minute = minute;
         this.forceVal = force;
+        this.averageForceVal = force;
         this.tempVal = temperature;
+        this.averageTempVal = temperature;
         this.isHeader = false;
         this.dateTime = new int[]{year, month, date, hour, minute};
         this.time = new int[]{hour,minute};
@@ -79,7 +102,9 @@ public class Records {
         this.hour = hour;
         this.minute = minute;
         this.forceVal = force;
+        this.averageForceVal = force;
         this.tempVal = temperature;
+        this.averageTempVal = temperature;
         this.longTermFlag = longTermFlag;
         this.isHeader = false;
         this.dateTime = new int[]{year, month, date, hour, minute};

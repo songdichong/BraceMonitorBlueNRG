@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Analyzer;
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Records;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Fragments.ConfigureDrawerFragment;
 
 
@@ -136,10 +137,9 @@ public class ForcePlotActivity extends Activity  {
 
     private boolean calPercentageData(){
         Analyzer analyzer = ConfigureDrawerFragment.analyzer;
-        Map<int[],Double> averageForces = analyzer.getAverageForce();
-        List<Double> forces = new ArrayList<Double>(averageForces.values());
+        List<Records> recordsList = analyzer.getMyRecordsList();
 
-        if (forces.size() > 0){
+        if (recordsList.size() > 0){
             double forceReference = getIntent().getDoubleExtra("force",0);
             int[] startEndIndex = getIntent().getIntArrayExtra("startEndIndex");
             int start = 0,end = 0;
@@ -148,7 +148,7 @@ public class ForcePlotActivity extends Activity  {
                 end  = startEndIndex[1];
             }
             for (int i = start;i<end;i++){
-                Double force = forces.get(i);
+                Double force = recordsList.get(i).getAverageForceVal();
                 if (force <= 0.1*forceReference){
                     noCounter++;
                 }

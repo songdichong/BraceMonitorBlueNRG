@@ -15,11 +15,13 @@ import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -28,13 +30,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Analyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Days;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Records;
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.TimeWithinDay;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Fragments.ConfigureDrawerFragment;
 
 public class AvgForcePlotActivity extends Activity  {
-    Map<int[], List<Double>> DailyForces = new HashMap<>();
     double max = 0.0;
     List<Date> xAxis = new ArrayList<>();
     List<Double> yAxis = new ArrayList<>();
+    Map<TimeWithinDay, List<Double>> DailyForces = new HashMap<>();
+    Date startTime;
+    Date endTime;
     @Override
      protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,8 +67,7 @@ public class AvgForcePlotActivity extends Activity  {
 
     public void myChartSettings(XYMultipleSeriesRenderer renderer) {
         renderer.setChartTitle("Daily Average Force Values");
-        Date startTime = new Date(2020,1,1);
-        Date endTime = new Date(2020,1,2);
+
         renderer.setXAxisMin(startTime.getTime());
         Log.v("start",String.valueOf(startTime.getTime()));
         renderer.setXAxisMax(endTime.getTime());
@@ -105,45 +109,29 @@ public class AvgForcePlotActivity extends Activity  {
         return renderer;
     }
 
-
     private void calLinePlotData(){
         Analyzer analyzer = ConfigureDrawerFragment.analyzer;
         int[] startEndIndex = getIntent().getIntArrayExtra("startEndIndex");
         int start = startEndIndex[0];
         int end  = startEndIndex[1];
-        AtomicInteger counter = new AtomicInteger();
-        for (Days days:analyzer.getMyDaysList()){
-            for (Records rec:days.getRecordsList())
-            {
-                if (counter.get() >=start && counter.get() <end)
-                {
-                    if (DailyForces.containsKey(rec.time))
-                    {
-                        List<Double> vals =  DailyForces.get(rec.time);
-                        vals.add(rec.getForceVal());
-                        DailyForces.put(rec.time,vals);
-                    }
-                    else{
-                        Double force = rec.getForceVal();
-                        List<Double> vals = new ArrayList<Double>();
-                        vals.add(force);
-                        DailyForces.put(rec.time,vals);
-                    }
-                }
-                counter.getAndIncrement();
+        List<Records> recordsList = analyzer.getMyRecordsList();
+        for (int counter = start; counter < end; counter++){
+            Records rec = recordsList.get(counter);
+            if (!rec.isHeader){
+                List<Double> vals =DailyForces.getOrDefault(new TimeWithinDay(rec.time),new ArrayList<Double>());
+                vals.add(rec.getForceVal());
+                DailyForces.put(new TimeWithinDay(rec.time),vals);
             }
         }
-        Map<Date,  Double> sortedEntry = new TreeMap<>();
-        for (Map.Entry<int[], List<Double>> entry : DailyForces.entrySet()) {
-            Date dt = new Date(2020,1,1,entry.getKey()[0],entry.getKey()[1]);
+        startTime = new Date(recordsList.get(start).getYear()-1900,recordsList.get(start).getMonth()-1,recordsList.get(start).getDate());
+        endTime = new Date(recordsList.get(start).getYear()-1900,recordsList.get(start).getMonth()-1,recordsList.get(start).getDate()+1);
+        for (Map.Entry<TimeWithinDay, List<Double>> entry : DailyForces.entrySet()) {
+            Date dt = new Date(recordsList.get(start).getYear()-1900,recordsList.get(start).getMonth()-1,
+                    recordsList.get(start).getDate(),entry.getKey().getHour(),entry.getKey().getMin());
             Double averageY = calculateAverage(entry.getValue());
-            sortedEntry.put(dt,averageY);
+            xAxis.add(dt);
+            yAxis.add(averageY);
         }
-        for (Map.Entry<Date, Double> entry:sortedEntry.entrySet()){
-            xAxis.add(entry.getKey());
-            yAxis.add(entry.getValue());
-        }
-
         for (Double y:yAxis){
             if (max<y) max = y;
         }

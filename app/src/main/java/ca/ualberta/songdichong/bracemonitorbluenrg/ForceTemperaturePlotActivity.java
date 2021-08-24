@@ -17,16 +17,16 @@ import org.achartengine.renderer.XYSeriesRenderer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Analyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Records;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Fragments.ConfigureDrawerFragment;
 
-public class TemperaturePlotActivity extends Activity {
-    int noCounter = 0;
+public class ForceTemperaturePlotActivity extends Activity {
     int onCounter = 0;
-    Double[] percentage = new Double[2];
+    int noCounter = 0;
+    double[] percentage = new double[2];
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,7 +38,7 @@ public class TemperaturePlotActivity extends Activity {
             Intent intent = ChartFactory.getBarChartIntent(this, getTruitonDataset(), renderer, BarChart.Type.DEFAULT);
             startActivity(intent);
         }else{
-             runOnUiThread(new Runnable() {
+            runOnUiThread(new Runnable() {
                 public void run() {
                     final Toast jam = Toast.makeText(getApplicationContext(), "No enough data", Toast.LENGTH_LONG);
                     jam.show();
@@ -53,39 +53,6 @@ public class TemperaturePlotActivity extends Activity {
             });
         }
         finish();
-
-    }
-
-    public XYMultipleSeriesDataset getTruitonDataset() {
-        XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
-        ArrayList<String> legendTitles = new ArrayList<String>();
-        legendTitles.add("Not Worn");
-        legendTitles.add("Worn");
-
-        for (int i = 0; i<2; i++){
-            XYSeries series = new XYSeries(legendTitles.get(i));
-            series.add(1,percentage[i]);
-            dataset.addSeries(series);
-        }
-
-        return dataset;
-    }
-
-    public void myChartSettings(XYMultipleSeriesRenderer renderer) {
-        renderer.setChartTitle("Temperature Compliance Measurement");
-        renderer.setXAxisMin(0.9);
-        renderer.setXAxisMax(1.1);
-        renderer.setYAxisMin(0);
-        renderer.setYAxisMax(110);
-        renderer.setYLabelsAlign(Paint.Align.RIGHT);
-        renderer.setBarSpacing(1);
-        renderer.setYTitle("Compliance Percentage[%]");
-        renderer.setShowGrid(true);
-        renderer.setGridColor(Color.GRAY);
-        renderer.setXLabels(0); // sets the number of integer labels to appear
-        renderer.setZoomEnabled(false, false);
-        renderer.setPanEnabled(false, false);
-        renderer.setDisplayValues(true);
     }
 
     public XYMultipleSeriesRenderer getTruitonRenderer() {
@@ -113,36 +80,74 @@ public class TemperaturePlotActivity extends Activity {
         return renderer;
     }
 
+
+    public XYMultipleSeriesDataset getTruitonDataset() {
+        XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
+        ArrayList<String> legendTitles = new ArrayList<String>();
+        legendTitles.add("Not Worn");
+        legendTitles.add("Worn");
+
+        for (int i = 0; i<2; i++){
+            XYSeries series = new XYSeries(legendTitles.get(i));
+            series.add(1,percentage[i]);
+            dataset.addSeries(series);
+        }
+
+        return dataset;
+    }
+
+    public void myChartSettings(XYMultipleSeriesRenderer renderer) {
+        renderer.setChartTitle("Force and Temperature Compliance Measurement");
+        renderer.setXAxisMin(0.9);
+        renderer.setXAxisMax(1.1);
+        renderer.setYAxisMin(0);
+        renderer.setYAxisMax(110);
+        renderer.setYLabelsAlign(Paint.Align.RIGHT);
+        renderer.setBarSpacing(1);
+        renderer.setYTitle("Compliance Percentage[%]");
+        renderer.setShowGrid(true);
+        renderer.setGridColor(Color.GRAY);
+        renderer.setXLabels(0); // sets the number of integer labels to appear
+        renderer.setZoomEnabled(false, false);
+        renderer.setPanEnabled(false, false);
+        renderer.setDisplayValues(true);
+    }
+
+
     private boolean calPercentageData(){
         Analyzer analyzer = ConfigureDrawerFragment.analyzer;
         List<Records> recordsList = analyzer.getMyRecordsList();
-
         if (recordsList.size() > 0){
+            double forceReference = getIntent().getDoubleExtra("force",0);
             double temperatureReference = getIntent().getDoubleExtra("temperature",0);
             int[] startEndIndex = getIntent().getIntArrayExtra("startEndIndex");
-            int start = 0;
-            int end  = 0;
-            if (startEndIndex != null){
+            int start = 0,end = 0;
+            if (startEndIndex != null) {
                 start = startEndIndex[0];
                 end  = startEndIndex[1];
             }
-
             for (int i = start;i<end;i++){
                 Double temperature = recordsList.get(i).getAverageTempVal();
-                if (temperature < temperatureReference){
-                    noCounter++;
-                }
-                else{
+                Double force = recordsList.get(i).getAverageForceVal();
+
+                if (temperature >= temperatureReference && force>=forceReference){
                     onCounter++;
                 }
+                else{
+                    noCounter++;
+                }
             }
+
             percentage[0] = (double)noCounter/(end-start)*100;
             percentage[1] = (double)onCounter/(end-start)*100;
+
+
             for (int j =0;j<2;j++){
                 percentage[j] = Math.round(percentage[j] * 100.0) / 100.0;
             }
             return true;
         }
+
         return false;
     }
 }

@@ -60,6 +60,7 @@ public class ConfigureSensorFragment extends PreferenceFragment{
     TextView temperatureText;
     TextView deviceName;
     TextView versionText;
+    TextView memoryText;
         BluetoothLeService mBluetoothLeService;
     int[] sleepWakeTimeArray = new int[4];
     /*1. Assign buttons(preference) using findPreference function.
@@ -152,6 +153,7 @@ public class ConfigureSensorFragment extends PreferenceFragment{
         temperatureText = (TextView) v.findViewById(R.id.temperature_value);
         deviceName = (TextView) v.findViewById(R.id.device_name);
         versionText = (TextView) v.findViewById(R.id.version_value);
+        memoryText = (TextView) v.findViewById(R.id.memory_value);
         return v;
     }
 
@@ -161,8 +163,16 @@ public class ConfigureSensorFragment extends PreferenceFragment{
         batteryText.setText(String.format("%.2f",mBluetoothLeService.batteryVal) + "V");
         deviceName.setText(mBluetoothLeService.deviceName);
         versionText.setText("v"+mBluetoothLeService.getDeviceVersionVal());
+        Log.v("currentAddress",mBluetoothLeService.getTotalAddress()+"");
+        if (mBluetoothLeService.getTotalAddress() != Integer.MIN_VALUE) {
+            double percentage = ((double)mBluetoothLeService.getTotalAddress() / 0x3FFFFF * 100);
+            memoryText.setText(String.format("%.1f",percentage)+"%");
+        }
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(Constants.ACTION_TEMP_UPDATE);
+        filter.addAction(Constants.ACTION_BATTERY_READ);
+        filter.addAction(Constants.ACTION_VERSION_UPDATE);
         filter.addAction(Constants.ACTION_GATT_DISCONNECTED);
         getActivity().getApplicationContext().registerReceiver(updateReceiver, filter);
     }
@@ -185,6 +195,21 @@ public class ConfigureSensorFragment extends PreferenceFragment{
             else if (Constants.ACTION_GATT_DISCONNECTED.equals(action)) {
                 if (getActivity() != null) {
                     ((MainActivity)getActivity()).restart();
+                }
+            }
+
+            else if (Constants.ACTION_BATTERY_READ.equals(action)) {
+                double batt = intent.getDoubleExtra(Constants.ACTION_BATTERY_READ,0);
+                batteryText.setText(String.format("%.2f",batt) + "V");
+            }
+
+            else if (Constants.ACTION_VERSION_UPDATE.equals(action)) {
+                int version = intent.getIntExtra("version",0);
+                int address = intent.getIntExtra("address", 0);
+                versionText.setText("v"+version);
+                if (mBluetoothLeService.getTotalAddress() != Integer.MIN_VALUE) {
+                    double percentage = ((double)address / 0x3FFFFF * 100);
+                    memoryText.setText(String.format("%.1f",percentage)+"%");
                 }
             }
         }

@@ -81,9 +81,30 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/battery_value"
             android:layout_marginTop="5dp"
-            android:layout_marginStart="15dp"
+            android:layout_marginStart="10dp"
             android:layout_toEndOf="@+id/version_label"
             android:text="v "
+            android:textColor="@color/green_color" />
+
+        <TextView
+            android:id="@+id/memory_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/temperature_label"
+            android:layout_alignStart="@+id/temperature_label"
+            android:layout_marginTop="5dp"
+            android:fontFamily="@string/title_section3"
+            android:text="Memory used" />
+
+        <TextView
+            android:id="@+id/memory_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/battery_value"
+            android:layout_marginTop="5dp"
+            android:layout_marginStart="10dp"
+            android:layout_toEndOf="@+id/memory_label"
+            android:text="NAN"
             android:textColor="@color/green_color" />
     </RelativeLayout>
 

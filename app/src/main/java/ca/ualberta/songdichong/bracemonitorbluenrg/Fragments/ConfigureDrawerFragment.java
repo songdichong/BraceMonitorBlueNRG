@@ -34,6 +34,7 @@ import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Analyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Days;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Records;
 import ca.ualberta.songdichong.bracemonitorbluenrg.ForcePlotActivity;
+import ca.ualberta.songdichong.bracemonitorbluenrg.ForceTemperaturePlotActivity;
 import ca.ualberta.songdichong.bracemonitorbluenrg.R;
 import ca.ualberta.songdichong.bracemonitorbluenrg.TemperaturePlotActivity;
 
@@ -49,6 +50,7 @@ public class ConfigureDrawerFragment extends Fragment {
     ImageButton configReferenceTemperature;
     Button drawForcePlotButton;
     Button drawTemperaturePlotButton;
+    Button drawForceTemperaturePlotButton;
     Button drawAvgForcePlotButton;
     Button drawAvgTemperaturePlotBUtton;
     int startYear;
@@ -61,8 +63,8 @@ public class ConfigureDrawerFragment extends Fragment {
     int endDayofMonth;
     int endHourofDay;
     int endMinuteofHour;
-    double force = 1.00;
-    double temperature = 28.0;
+    static double force = 1.00;
+    static double temperature = 28.0;
     BluetoothLeService bluetoothLeService = BluetoothLeService.getmBluetoothLeService();
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -78,9 +80,9 @@ public class ConfigureDrawerFragment extends Fragment {
         configReferenceTemperature = rootView.findViewById(R.id.config_reference_temperature_value_button);
         drawForcePlotButton = rootView.findViewById(R.id.draw_force_plot_button);
         drawTemperaturePlotButton = rootView.findViewById(R.id.draw_temperature_plot_button);
+        drawForceTemperaturePlotButton = rootView.findViewById(R.id.draw_force_temperature_plot_button);
         drawAvgForcePlotButton = rootView.findViewById(R.id.draw_avg_force_plot_button);
         drawAvgTemperaturePlotBUtton = rootView.findViewById(R.id.draw_avg_temperature_plot_button);
-
 
         if (BluetoothLeService.downloadedData.size() == 0 ){
             Log.v("123","0");
@@ -157,7 +159,6 @@ public class ConfigureDrawerFragment extends Fragment {
             drawTemperaturePlotButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Log.v("here","drawtemp");
                     Intent intent = new Intent(getActivity(), TemperaturePlotActivity.class);
                     intent.putExtra("temperature", temperature);
                     int[] startTime = new int[5];
@@ -181,6 +182,35 @@ public class ConfigureDrawerFragment extends Fragment {
                     }
                 }
             });
+
+            drawForceTemperaturePlotButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(getActivity(), ForceTemperaturePlotActivity.class);
+                    intent.putExtra("temperature", temperature);
+                    intent.putExtra("force", force);
+                    int[] startTime = new int[5];
+                    startTime[0] = startYear;
+                    startTime[1] = startMonth;
+                    startTime[2] = startDayofMonth;
+                    startTime[3] = startHourofDay;
+                    startTime[4] = startMinuteofHour;
+                    int[] endTime = new int[5];
+                    endTime[0] = endYear;
+                    endTime[1] = endMonth;
+                    endTime[2] = endDayofMonth;
+                    endTime[3] = endHourofDay;
+                    endTime[4] = endMinuteofHour;
+                    int[] startEndIndex = analyzer.getStartEndIndex(startTime,endTime);
+                    if (startEndIndex[1] == 0 || startEndIndex[0]>startEndIndex[1]){
+                        Toast.makeText(getContext(), "Date selection is invalid", Toast.LENGTH_LONG).show();
+                    }else{
+                        intent.putExtra("startEndIndex",startEndIndex);
+                        startActivity(intent);
+                    }
+                }
+            });
+
 
             drawAvgForcePlotButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -237,6 +267,7 @@ public class ConfigureDrawerFragment extends Fragment {
         return rootView;
 
     }
+
 
     public String getTimeString(int time){
         String result = String.valueOf(time);

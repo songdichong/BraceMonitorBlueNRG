@@ -27,16 +27,14 @@ import java.util.Map;
  * @usage ConfigDrawerFragment
  */
 public class Analyzer {
-    List<Days> myDaysList;
-    Map<int[], Double> averageForce = new HashMap<>();
-    Map<int[], Double> averageTemperature = new HashMap<>();
+    List<Days> myDaysList  = new ArrayList<>();
+    List<Records> myRecordsList = new ArrayList<>();
     private int subjectNumber;
     private int sampleRate;
     private double targetForce;
     private String deviceName;
     //use the file in the directory to generate analyzer class
     public Analyzer(File file){
-        myDaysList = new ArrayList<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
             //first line device name
@@ -78,8 +76,8 @@ public class Analyzer {
                     {
                         header = line.split("[\\s:]+");
                         String subject_number_string = header[2];
-                        String target_force_string = header[5];
-                        String sample_rate_string = header[8];
+                        String target_force_string = header[6];
+                        String sample_rate_string = header[9];
                         subjectNumber = Integer.valueOf(subject_number_string);
                         targetForce = Double.valueOf(target_force_string);
                         sampleRate = Integer.valueOf(sample_rate_string);
@@ -95,16 +93,13 @@ public class Analyzer {
             }
             formAnalyzer(downloadedData);
         }
-        catch(FileNotFoundException e){
+        catch(IOException e){
 
         }
-        catch (IOException e) {
-        }
     }
+
     private void formAnalyzer(List<Records> downloadedData)
     {
-        Log.v("here","formAnalyzer()");
-        myDaysList = new ArrayList<>();
         if (downloadedData.size() == 0)
         {
             return;
@@ -117,6 +112,7 @@ public class Analyzer {
         for (int i = 0; i < downloadedData.size(); i++)
         {
             Records myRecords = downloadedData.get(i);
+            myRecordsList.add(myRecords);
             if (!myRecords.isHeader)
             {
                 day = myRecords.date;
@@ -140,26 +136,27 @@ public class Analyzer {
                 targetForce = myRecords.targetForce;
             }
         }
-        myDaysList.add(myDays);
+        if (myDaysList.size()==0){
+            myDaysList.add(myDays);
+        }
+
         double[] averageF = new double[5];
         double[] averageT = new double[5];
-        int[][] first5Dts = new int[5][5];
         int counter = 0;
         for (Days days:myDaysList){
             for (Records rec:days.getRecordsList()){
                 averageF[counter%5] = rec.getForceVal();
                 averageT[counter%5] = rec.getTempVal();
-                first5Dts[counter%5] = rec.dateTime;
                 if (counter == 5){
                     for (int i = 0; i < 5; i++)
                     {
-                        averageForce.put(first5Dts[i],calculateAvg(averageF));
-                        averageTemperature.put(first5Dts[i],calculateAvg(averageT));
+                        rec.setAverageForceVal(calculateAvg(averageF));
+                        rec.setAverageTempVal(calculateAvg(averageT));
                     }
                 }
                 if (counter > 5){
-                    averageForce.put(rec.dateTime,calculateAvg(averageF));
-                    averageTemperature.put(rec.dateTime,calculateAvg(averageT));
+                    rec.setAverageForceVal(calculateAvg(averageF));
+                    rec.setAverageTempVal(calculateAvg(averageT));
                 }
                 counter++;
             }
@@ -177,13 +174,6 @@ public class Analyzer {
         return total/arrays.length;
     }
 
-    public Map<int[], Double> getAverageForce(){
-        return averageForce;
-    }
-
-    public Map<int[], Double> getAverageTemperature(){
-        return averageTemperature;
-    }
 
     public Days getDaysFromDaysList(int year, int month, int day){
         for (Days days:myDaysList){
@@ -199,8 +189,8 @@ public class Analyzer {
         int counter = 0;
         Records startRecord = new Records(startTime[0],startTime[1],startTime[2],startTime[3],startTime[4],0,0);
         Records endRecord = new Records(endTime[0],endTime[1],endTime[2],endTime[3],endTime[4],0,0);
-        for (Days days:myDaysList){
-            for (Records rec:days.getRecordsList()) {
+        for (Records rec: myRecordsList){
+            if (!rec.isHeader) {
                 if (rec.dateEquals(startRecord)){
                     result[0] = counter;
                 }
@@ -208,16 +198,18 @@ public class Analyzer {
                     result[1] = counter;
                     break;
                 }
-                counter++;
             }
+            counter++;
         }
+        Log.v("start",Arrays.toString(startTime));
+        Log.v("end",Arrays.toString(endTime));
+        Log.v("counter",counter+"");
         return result;
     }
 
     //use the downloaded data object to generate analyzer class
     public Analyzer(List<Records> downloadedData){
         //first line must be Header+year
-        myDaysList = new ArrayList<>();
         formAnalyzer(downloadedData);
     }
 
@@ -225,4 +217,7 @@ public class Analyzer {
         return targetForce;
     }
 
+    public List<Records> getMyRecordsList() {
+        return myRecordsList;
+    }
 }

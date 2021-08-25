@@ -286,7 +286,7 @@ public class RealTimePlotFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (Constants.ACTION_FORCE_UPDATE.equals(action)) {
-                double forceVal = intent.getDoubleExtra("forceVal",0);
+                double forceVal = intent.getDoubleExtra(Constants.ACTION_FORCE_UPDATE,0);
 
                 if (mBluetoothLeService.getDeviceInfoVal() == Constants.activeBraceMonitor){
                     data.updateDataSetActive(forceVal);

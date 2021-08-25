@@ -147,10 +147,10 @@ public class CalibrationFragment  extends Fragment {
             final String action = intent.getAction();
             if (Constants.ACTION_FORCE_UPDATE.equals(action)) {
                 if (mBluetoothLeService.getDeviceInfoVal() == Constants.activeBraceMonitor) {
-                    currentForceMeasurement = intent.getDoubleExtra("forceVal",0);
+                    currentForceMeasurement = intent.getDoubleExtra(Constants.ACTION_FORCE_UPDATE,0);
                 }
                 else {
-                    double forceValue = intent.getDoubleExtra("forceVal",0);
+                    double forceValue = intent.getDoubleExtra(Constants.ACTION_FORCE_UPDATE,0);
                     double[] forceCalibration = mBluetoothLeService.getForceCalibration();
                     double forceMeasurement;
                     if (forceValue <= forceCalibration[1]) {

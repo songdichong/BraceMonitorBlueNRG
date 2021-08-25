@@ -532,14 +532,14 @@ public class    AdvancedConfigurationFragment extends PreferenceFragment {
                 }
             }
             if (Constants.ACTION_TEMP_UPDATE.equals(action)) {
-                double temperature = intent.getDoubleExtra("temperatureVal",0);
+                double temperature = intent.getDoubleExtra(Constants.ACTION_TEMP_UPDATE,0);
                 temperatureText.setText(String.format("%.1f",temperature) + "°C");
             } else if (Constants.ACTION_TEMPRAW_UPDATE.equals(action)) {
-                double temperature = intent.getDoubleExtra("adcVoltage",0);
+                double temperature = intent.getDoubleExtra(Constants.ACTION_TEMPRAW_UPDATE,0);
                 temperatureVoltage.setText(String.format("%.2f",temperature) + "V");
             } else if (Constants.ACTION_FORCE_UPDATE.equals(action)) {
                 if (mBluetoothLeService.getDeviceInfoVal() == Constants.activeBraceMonitor) {
-                    double forceValue = intent.getDoubleExtra("forceVal",0);
+                    double forceValue = intent.getDoubleExtra(Constants.ACTION_FORCE_UPDATE,0);
                     forceVoltage.setText(String.format("%.2f",forceValue) + "V");
                     double[] forceCalibration = mBluetoothLeService.getForceCalibration();
                     double slope = forceCalibration[0];
@@ -548,7 +548,7 @@ public class    AdvancedConfigurationFragment extends PreferenceFragment {
                     forceText.setText(String.format("%.2f",forceMeasurement) + "mmHg");
                 }
                 else {
-                    double forceValue = intent.getDoubleExtra("forceVal",0);
+                    double forceValue = intent.getDoubleExtra(Constants.ACTION_FORCE_UPDATE,0);
                     forceVoltage.setText(String.format("%.2f",forceValue) + "V");
                     double[] forceCalibration = mBluetoothLeService.getForceCalibration();
                     double forceMeasurement;
@@ -569,9 +569,10 @@ public class    AdvancedConfigurationFragment extends PreferenceFragment {
                 }
             }
             else if (Constants.ACTION_EXTERNAL_TEST.equals(action)) {
-                if (getActivity() != null) {
-                    block = intent.getByteExtra("block",(byte)0xFF);
-                    status = intent.getByteExtra("status",(byte)0);
+                byte[] array = intent.getByteArrayExtra(Constants.ACTION_EXTERNAL_TEST);
+                if (getActivity() != null && (array!= null)) {
+                    block = array[0];
+                    status = array[1];
                     if (status != 1) {
                         problematicBlock.add(block);
                     }

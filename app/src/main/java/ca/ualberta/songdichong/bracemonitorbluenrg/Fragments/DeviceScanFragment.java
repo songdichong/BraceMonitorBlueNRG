@@ -128,7 +128,7 @@ public class DeviceScanFragment extends Fragment {
             else if (Constants.ACTION_GATT_CONNECTED.equals(action)){
                 progressBar.setVisibility(View.INVISIBLE);
                 scanButton.setEnabled(false);
-                BluetoothLeService.deviceName = intent.getStringExtra("deviceName");
+                BluetoothLeService.deviceName = intent.getStringExtra(Constants.ACTION_GATT_CONNECTED);
             }
             else if (Constants.ACTION_BATTERY_READ.equals(action)) {
                 byte[] batteryTemp = intent.getByteArrayExtra("batteryLevel");

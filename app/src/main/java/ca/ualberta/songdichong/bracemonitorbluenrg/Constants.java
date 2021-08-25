@@ -51,7 +51,6 @@ public class Constants {
     public static final String ACTION_DATA_DOWNLOAD = "ca.ualberta.songdichong.bracemonitorbluenrg.ACTION_DATA_DOWNLOAD";
     public static final String ACTION_EXTERNAL_TEST = "ca.ualberta.songdichong.bracemonitorbluenrg.ACTION_EXTERNAL_TEST";
     public static final String ACTION_DATA_ERASE = "ca.ualberta.songdichong.bracemonitorbluenrg.ACTION_DATA_ERASE";
-    public static final String ACTION_RESTARTAPP = "ca.ualberta.songdichong.bracemonitorbluenrg.ACTION_RESTARTAPP";
     public static final String ACTION_VERSION_UPDATE = "ca.ualberta.songdichong.bracemonitorbluenrg.ACTION_VERSION_UPDATE";
 
     public static final int externalFlashBraceMonitor = 0;

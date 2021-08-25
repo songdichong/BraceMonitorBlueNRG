@@ -351,7 +351,7 @@ public class BluetoothLeService {
                     else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                         Log.v("here1","connection terminated");
                         terminateConnection();
-                        broadcastUpdate(ACTION_RESTARTAPP,"");
+                        broadcastUpdate(ACTION_GATT_DISCONNECTED,"");
                     }
                 }
 
@@ -372,12 +372,12 @@ public class BluetoothLeService {
                         }
                         catch (NullPointerException e){
                             makeToast("Error finding device services");
-                            broadcastUpdate(ACTION_RESTARTAPP, "" );
+                            broadcastUpdate(ACTION_GATT_DISCONNECTED, "" );
                         }
                     }
                     else {
                         makeToast("Error finding device services");
-                        broadcastUpdate(ACTION_RESTARTAPP, "" );
+                        broadcastUpdate(ACTION_GATT_DISCONNECTED, "" );
                     }
                 }
                 //firmware bluenrg always return 0 on the first read of any characteristic, so if we read for the first time we read again
@@ -1787,6 +1787,7 @@ public class BluetoothLeService {
     public double[] getForceCalibration(){
         return new double[]{forceCaliVal0,forceCaliVal1,forceCaliVal2,forceCaliVal3};
     }
+
     /*
      * Function Name: broadcastUpdate
      *
@@ -1797,67 +1798,22 @@ public class BluetoothLeService {
      *
      * Output: None.
      * */
-    private void broadcastUpdate(String action, double data) {
+    private void broadcastUpdate(String action, Object data) {
         Intent intent = new Intent(action);
-        if (ACTION_FORCE_UPDATE.equals(action)){
-            intent.putExtra("forceVal",data);
+        if(data instanceof Integer){
+            intent.putExtra(action, (int)data);
         }
-        else if (ACTION_TEMP_UPDATE.equals(action)){
-            intent.putExtra("temperatureVal",data);
+        else if (data instanceof String){
+            intent.putExtra(action, (String) data);
         }
-        else if (ACTION_DATA_DOWNLOAD.equals(action)){
-            intent.putExtra("downloadVal",data);
+        else if (data instanceof Double){
+            intent.putExtra(action, (Double) data);
         }
-        else if (ACTION_DATA_ERASE.equals(action)){
-            intent.putExtra("erase",data);
+        else if (data instanceof byte[]) {
+            intent.putExtra(action, (byte[]) data);
         }
-        else if (ACTION_BATTERY_READ.equals(action)){
-            intent.putExtra(ACTION_BATTERY_READ,data);
-        }
-        else{
-            intent.putExtra("adcVoltage",data);
-        }
-        context.sendBroadcast(intent);
-    }
-
-    private void broadcastUpdate(String action, String data) {
-        Intent intent = new Intent(action);
-        if (ACTION_GATT_CONNECTED.equals(action)) {
-            intent.putExtra("deviceName", data);
-        }
-        else if (ACTION_GATT_DISCONNECTED.equals(action)){
-            intent.putExtra("status",data);
-        }
-
-        else {
-            intent.putExtra("","");
-        }
-        context.sendBroadcast(intent);
-    }
-    /*
-     * Function Name: broadcastUpdate
-     *
-     * Function Detail: The function broadcast actions to fragments. Fragments receive updates with updateReceiver
-     *
-     * Input: String action, Constants of action.
-     *        byte[] data
-     *
-     * Output: None.
-     * */
-    private void broadcastUpdate(final String action, byte[] data) {
-        Intent intent = new Intent(action);
-        if (ACTION_EXTERNAL_TEST.equals(action)) {
-            intent.putExtra("block", data[0]);
-            intent.putExtra("status", data[1]);
-        }
-        context.sendBroadcast(intent);
-    }
-
-    private void broadcastUpdate(final String action, int[] data) {
-        Intent intent = new Intent(action);
-        if (ACTION_VERSION_UPDATE.equals(action)) {
-            intent.putExtra("version", data[0]);
-            intent.putExtra("address", data[1]);
+        else if (data instanceof int[]){
+            intent.putExtra(action, (int[]) data);
         }
         context.sendBroadcast(intent);
     }

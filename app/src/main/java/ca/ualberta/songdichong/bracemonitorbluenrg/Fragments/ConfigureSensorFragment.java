@@ -188,7 +188,7 @@ public class ConfigureSensorFragment extends PreferenceFragment{
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (Constants.ACTION_TEMP_UPDATE.equals(action)) {
-                double temperature = intent.getDoubleExtra("temperatureVal",0);
+                double temperature = intent.getDoubleExtra(Constants.ACTION_TEMP_UPDATE,0);
                 temperatureText.setText(String.format("%.1f",temperature) + "°C");
             }
 
@@ -204,12 +204,15 @@ public class ConfigureSensorFragment extends PreferenceFragment{
             }
 
             else if (Constants.ACTION_VERSION_UPDATE.equals(action)) {
-                int version = intent.getIntExtra("version",0);
-                int address = intent.getIntExtra("address", 0);
-                versionText.setText("v"+version);
-                if (mBluetoothLeService.getTotalAddress() != Integer.MIN_VALUE) {
-                    double percentage = ((double)address / 0x3FFFFF * 100);
-                    memoryText.setText(String.format("%.1f",percentage)+"%");
+                int[] array = intent.getIntArrayExtra(Constants.ACTION_VERSION_UPDATE);
+                if (array!= null) {
+                    int version = array[0];
+                    int address = array[1];
+                    versionText.setText("v"+version);
+                    if (mBluetoothLeService.getTotalAddress() != Integer.MIN_VALUE) {
+                        double percentage = ((double)address / 0x3FFFFF * 100);
+                        memoryText.setText(String.format("%.1f",percentage)+"%");
+                    }
                 }
             }
         }

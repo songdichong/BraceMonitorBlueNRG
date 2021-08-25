@@ -191,7 +191,7 @@ public class OutPutDataFragment extends PreferenceFragment {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (Constants.ACTION_TEMP_UPDATE.equals(action)) {
-                double temperature = intent.getDoubleExtra("temperatureVal",0);
+                double temperature = intent.getDoubleExtra(Constants.ACTION_TEMP_UPDATE,0);
                 temperatureText.setText(String.format("%.1f",temperature) + "°C");
             }
 
@@ -200,24 +200,27 @@ public class OutPutDataFragment extends PreferenceFragment {
                     ((MainActivity)getActivity()).restart();
                 }
             }
-            
+
             else if (Constants.ACTION_BATTERY_READ.equals(action)) {
                 double batt = intent.getDoubleExtra(Constants.ACTION_BATTERY_READ,0);
                 batteryText.setText(String.format("%.2f",batt) + "V");
             }
 
             else if (Constants.ACTION_VERSION_UPDATE.equals(action)) {
-                int version = intent.getIntExtra("version",0);
-                int address = intent.getIntExtra("address", 0);
-                versionText.setText("v"+version);
-                if (mBluetoothLeService.getTotalAddress() != Integer.MIN_VALUE) {
-                    double percentage = ((double)address / 0x3FFFFF * 100);
-                    memoryText.setText(String.format("%.1f",percentage)+"%");
+                int[] array = intent.getIntArrayExtra(Constants.ACTION_VERSION_UPDATE);
+                if (array!= null) {
+                    int version = array[0];
+                    int address = array[1];
+                    versionText.setText("v"+version);
+                    if (mBluetoothLeService.getTotalAddress() != Integer.MIN_VALUE) {
+                        double percentage = ((double)address / 0x3FFFFF * 100);
+                        memoryText.setText(String.format("%.1f",percentage)+"%");
+                    }
                 }
             }
 
             else if (Constants.ACTION_DATA_DOWNLOAD.equals(action)) {
-                double length = intent.getDoubleExtra("downloadVal",0);
+                double length = intent.getDoubleExtra(Constants.ACTION_DATA_DOWNLOAD,0);
                 downloadedSize += length;
                 Log.v("downloadedSize",downloadedSize+"");
                 if (getActivity() != null) {
@@ -237,7 +240,7 @@ public class OutPutDataFragment extends PreferenceFragment {
             //waiting dialogue should exists, then show this dialogue for x seconds.
             else if (Constants.ACTION_DATA_ERASE.equals(action)){
                 if (getActivity() != null) {
-                    final double timer = intent.getDoubleExtra("erase",1);
+                    final double timer = intent.getDoubleExtra(Constants.ACTION_DATA_ERASE,1);
                     CountDownTimer cdt = new CountDownTimer( (int)timer*1000,1000){
                         public void onTick(long millisUntilFinished){
                             if(popupWindowDownloading != null){

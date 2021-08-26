@@ -108,6 +108,10 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.ActiveRecords;
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.HeaderRecords;
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.NonHeaderRecords;
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.PassiveRecords;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Records;
 import static ca.ualberta.songdichong.bracemonitorbluenrg.Constants.*;
 
@@ -588,7 +592,7 @@ public class BluetoothLeService {
                             FormatDownloadedData_Active(characteristic.getValue());
 //                            byteArrayList.add(characteristic.getValue());
                         }
-                        broadcastUpdate(ACTION_DATA_DOWNLOAD,characteristic.getValue().length);
+                        broadcastUpdate(ACTION_DATA_DOWNLOAD,(int)characteristic.getValue().length);
                     }
                     else if  (characteristic.getUuid().equals(UUID_FORCE_SENSOR_VALUE)){
                         double forceADCVoltage;
@@ -1062,8 +1066,8 @@ public class BluetoothLeService {
                 int subject_number =  subject_number_msd + subject_number_lsd;
                 int forceDigits =  arrays[index+10] >= 0 ? arrays[index+10]:arrays[index+10]+256;
                 int forceDecimals =  arrays[index+11] >= 0 ? arrays[index+11]:arrays[index+11]+256;
-                double target_force = forceDigits + forceDecimals*0.01;
-                Records records = new Records(subject_number, target_force, sampleRate);
+                float target_force = forceDigits + forceDecimals*0.01f;
+                Records records = new HeaderRecords(subject_number, target_force, sampleRate);
                 downloadedData.add(records);
                 index += 12;
                 //If all info are 0, that means date info is missing
@@ -1097,8 +1101,8 @@ public class BluetoothLeService {
                 byte[] forceArray = new byte[]{arrays[index], arrays[index+1]};
                 byte[] temperatureArray = new byte[]{arrays[index+2], arrays[index+3]};
                 double temperatureVoltage = convertADC(temperatureArray, ADC_Input_AdcPin2);
-                double forceVoltage = convertADC(forceArray,ADC_Input_AdcPin1);
-                double temperature = (temperatureVoltage - tempCaliADCVal)/0.01 + tempCaliRealVal;
+                float forceVoltage = convertADC(forceArray,ADC_Input_AdcPin1);
+                float temperature = (float)((temperatureVoltage - tempCaliADCVal)/0.01 + tempCaliRealVal);
 
                 double forceMeasurement;
                 if (forceVoltage <= forceCaliVal1) {
@@ -1115,7 +1119,7 @@ public class BluetoothLeService {
                 }
                 if (forceMeasurement<0) {forceMeasurement = 0;}
 
-                Records records = new Records(recordYear,recordMonth,recordDay,recordHour,recordMinute,forceMeasurement,temperature);
+                Records records = new PassiveRecords(recordYear,recordMonth,recordDay,recordHour,recordMinute,(float)forceMeasurement,temperature);
 
                 downloadedData.add(records);
 
@@ -1184,7 +1188,7 @@ public class BluetoothLeService {
                 int subject_number =  subject_number_msd + subject_number_lsd;
                 int targetPressure =  arrays[index+10] >= 0 ? arrays[index+10]:arrays[index+10]+256;
                 int allowance =  arrays[index+11] >= 0 ? arrays[index+11]:arrays[index+11]+256;
-                Records records = new Records(subject_number, targetPressure, allowance, sampleRate);
+                Records records = new HeaderRecords(subject_number, targetPressure, allowance, sampleRate);
 
                 downloadedData.add(records);
                 index += 12;
@@ -1219,13 +1223,13 @@ public class BluetoothLeService {
                 // create Records object and add it into list
                 byte[] forceArray = new byte[]{arrays[index], arrays[index+1]};
                 byte[] temperatureArray = new byte[]{arrays[index+2], arrays[index+3]};
-                double temperature = convertADC(temperatureArray, temperatureSensor);
-                double forceVoltage = convertADC(forceArray, ADC_Input_AdcPin2);
+                float temperature = convertADC(temperatureArray, temperatureSensor);
+                float forceVoltage = convertADC(forceArray, ADC_Input_AdcPin2);
                 int longTermFlag = (arrays[index+4] < 0? arrays[index+4] + 256 : arrays[index+4]) + arrays[index+5]*256;
                 //forceCaliVal0 == slope forceCaliVal1 == intercept
-                double forceMeasurement = forceCaliVal0 * forceVoltage + forceCaliVal1;
+                float forceMeasurement = (float) (forceCaliVal0 * forceVoltage + forceCaliVal1);
 
-                Records records = new Records(recordYear,recordMonth,recordDay,recordHour,recordMinute,forceMeasurement,temperature,longTermFlag);
+                Records records = new ActiveRecords(recordYear,recordMonth,recordDay,recordHour,recordMinute,forceMeasurement,temperature,longTermFlag);
 
                 downloadedData.add(records);
                 index += 6;
@@ -1294,8 +1298,8 @@ public class BluetoothLeService {
                 int subject_number = arrays[index+8] >= 0 ? arrays[index+8]:arrays[index+8]+256;
                 int forceDigits =  arrays[index+9] >= 0 ? arrays[index+9]:arrays[index+9]+256;
                 int forceDecimals =  arrays[index+10] >= 0 ? arrays[index+10]:arrays[index+10]+256;
-                double target_force = forceDigits + forceDecimals*0.01;
-                Records records = new Records(subject_number, target_force, sampleRate);
+                float target_force = (float) (forceDigits + forceDecimals*0.01);
+                Records records = new HeaderRecords(subject_number, target_force, sampleRate);
                 downloadedData.add(records);
                 index += 12;
                 //If all info are 0, that means date info is missing
@@ -1310,7 +1314,7 @@ public class BluetoothLeService {
                 int  temperature = arrays[index];
                 double forceMeasurement  = arrays[index+1]  * 0.05;
                 if (temperature != 0 || forceMeasurement!=0){
-                    Records records = new Records(recordYear,recordMonth,recordDay,recordHour,recordMinute,forceMeasurement,temperature);
+                    Records records = new PassiveRecords(recordYear,recordMonth,recordDay,recordHour,recordMinute,(float) forceMeasurement,temperature);
                     downloadedData.add(records);
                     recordSecond += sampleRate*10;
 
@@ -1372,13 +1376,16 @@ public class BluetoothLeService {
             out.write(("Force [N], Temperature [°C], Year, Month, Day, Hour, Minute\n").getBytes());
             out.write('\n');
             for (int i = 0; i < data.size(); i++) {
-                Records record = data.get(i);
-                if (record.isHeader){
-                    String output = record.getHeaderStringPassive();
+                Records rec = data.get(i);
+                if (rec.isHeader){
+                    String output = ((HeaderRecords)rec).getHeaderString(false);
                     out.write(output.getBytes());
                 }else{
-                    String[] outputArray = new String[]{String.format("%.2f",record.getForceVal()),String.format("%.2f",record.getTempVal()),String.valueOf(record.getYear()),
-                            String.valueOf(record.getMonth()),String.valueOf(record.getDate()),String.valueOf(record.getHour()),String.valueOf(record.getMinute())};
+                    NonHeaderRecords record = (NonHeaderRecords) rec;
+                    String[] outputArray = new String[]{String.format("%.1f",record.getForceVal()),String.format("%.1f",record.getTempVal()),
+                            String.valueOf(record.getDate().getYear()), String.valueOf(record.getDate().getMonth()+1),
+                            String.valueOf(record.getDate().getDate()),String.valueOf(record.getDate().getHours()),
+                            String.valueOf(record.getDate().getMinutes())};
                     String output = Arrays.toString(outputArray);
                     out.write(output.substring(1, output.length() - 1).getBytes());
                     out.write('\n');
@@ -1403,13 +1410,16 @@ public class BluetoothLeService {
             out.write(("Pressure [mmHg], Temperature [°C], LongTermFlag, Year, Month, Day, Hour, Minute\n").getBytes());
             out.write('\n');
             for (int i = 0; i < data.size(); i++) {
-                Records record = data.get(i);
-                if (record.isHeader){
-                    String output = record.getHeaderStringActive();
+                Records rec = data.get(i);
+                if (rec.isHeader){
+                    String output = ((HeaderRecords)rec).getHeaderString(true);
                     out.write(output.getBytes());
                 }else{
-                    String[] outputArray = new String[]{String.format("%.2f",record.getForceVal()),String.format("%.2f",record.getTempVal()),String.valueOf(record.getLongTermFlag()),String.valueOf(record.getYear()),
-                            String.valueOf(record.getMonth()),String.valueOf(record.getDate()),String.valueOf(record.getHour()),String.valueOf(record.getMinute())};
+                    NonHeaderRecords record = (NonHeaderRecords) rec;
+                    String[] outputArray = new String[]{String.format("%.1f",record.getForceVal()),String.format("%.1f",record.getTempVal()),
+                            String.valueOf(record.getLongTermFlag()),String.valueOf(record.getDate().getYear()),
+                            String.valueOf(record.getDate().getMonth()+1),String.valueOf(record.getDate().getDate()),
+                            String.valueOf(record.getDate().getHours()),String.valueOf(record.getDate().getMinutes())};
                     String output = Arrays.toString(outputArray);
                     out.write(output.substring(1, output.length() - 1).getBytes());
                     out.write('\n');
@@ -1473,13 +1483,13 @@ public class BluetoothLeService {
      *
      * Output: None.
      * */
-    public double convertADC(byte[] adcRawVal, int sensorType){
+    public float convertADC(byte[] adcRawVal, int sensorType){
         if (adcRawVal == null || adcRawVal.length < 2) {
             //size must >= 2.
             return 0;
         }
 
-        double resultVoltage = 0;
+        float resultVoltage = 0;
 
         //We are sending unsigned byte but java by default byte is signed.
         int digits = adcRawVal[0];
@@ -1492,19 +1502,19 @@ public class BluetoothLeService {
         double rawVal = digits + tens*256;
         switch (sensorType){
             case batterySensor:
-                resultVoltage = 4.36 * (0.6 - (rawVal/41260.0) * 2.4);
+                resultVoltage =(float)(4.36 * (0.6 - (rawVal/41260.0) * 2.4));
                 break;
 
             case ADC_Input_AdcPin2:
-                resultVoltage = 3 * (0.6 - (rawVal/41260.0) * 2.4);
+                resultVoltage =(float)( 3 * (0.6 - (rawVal/41260.0) * 2.4));
                 break;
 
             case ADC_Input_AdcPin1:
-                resultVoltage = 3 * (0.6 + (rawVal/41260.0) * 2.4);
+                resultVoltage = (float)(3 * (0.6 + (rawVal/41260.0) * 2.4));
                 break;
 
             case temperatureSensor:
-                resultVoltage = 401 * (0.6 - (rawVal/41260.0) * 2.4) - 267;
+                resultVoltage = (float)(401 * (0.6 - (rawVal/41260.0) * 2.4) - 267);
                 break;
         }
         if (resultVoltage>0)

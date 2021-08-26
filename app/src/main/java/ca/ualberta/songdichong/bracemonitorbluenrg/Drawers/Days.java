@@ -1,40 +1,33 @@
 package ca.ualberta.songdichong.bracemonitorbluenrg.Drawers;
 
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-
 /**
  * @author songdichong
  *
- * @object Days: record Records within the same day
+ * @object Drawers.Days: record Drawers.Records within the same day
  *
  * @constructor  int year, int month, int date
  *
- * @return List<Records> recordsList
+ * @return List<Drawers.Records> recordsList
  */
 public class Days implements Comparable<Days>{
-    int year;
-    int month;
-    int date;
+    Date date;
     List<Records> recordsList;
 
     public Days(int year, int month, int date) {
-        this.year = year;
-        this.month = month;
-        this.date = date;
         this.recordsList =  new ArrayList<>();
-    }
+        try{
+            this.date = new Date(year-1900,month-1,date);
+        }
+        catch (Exception e){
 
-    public int getYear() {
-        return year;
+        }
     }
-
-    public int getMonth() {
-        return month;
-    }
-
-    public int getDate() {
+    public Date getDate() {
         return date;
     }
 
@@ -43,20 +36,19 @@ public class Days implements Comparable<Days>{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Days days = (Days) o;
-        return year == days.year &&
-                month == days.month &&
-                date == days.date;
+        return date.equals(days.date);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(year, month, date);
+        return Objects.hash( date);
     }
 
-    public boolean isEqual(int year, int month, int day){
-        return year == this.year &&
-                month == this.month &&
-                day == this.date;
+    public boolean belongsTo(NonHeaderRecords rec){
+        if (date == null) return false;
+        return date.getYear() == rec.getDate().getYear() &&
+                date.getMonth() == rec.getDate().getMonth() &&
+                date.getDate() == rec.getDate().getDate();
     }
 
     public List<Records> getRecordsList() {
@@ -65,20 +57,11 @@ public class Days implements Comparable<Days>{
 
     @Override
     public int compareTo(Days o) {
-        if (this.year != o.year){
-            return this.year > o.year ? 1:-1;
-        }
-        else if (this.year == o.year && this.month != o.month){
-            return this.month > o.month ? 1: -1;
-        }
-        else if (this.year == o.year &&  this.month == o.month && this.date != o.date) {
-            return this.date > o.date ? 1:-1;
-        }
-        return 0;
-    }
+        return date.compareTo(o.date);
 
+    }
     @Override
     public String toString(){
-        return "yyyy-mm-dd: "+this.year+"-"+this.month+"-"+this.date;
+        return "yyyy-mm-dd: "+this.date.toString();
     }
 }

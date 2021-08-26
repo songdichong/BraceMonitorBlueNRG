@@ -16,11 +16,11 @@ import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
-import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Analyzer;
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.NonHeaderRecords;
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.PassiveAnalyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Records;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Fragments.ConfigureDrawerFragment;
 
@@ -135,47 +135,46 @@ public class ForcePlotActivity extends Activity  {
         return renderer;
     }
 
-    private boolean calPercentageData(){
-        Analyzer analyzer = ConfigureDrawerFragment.analyzer;
+    private boolean calPercentageData() {
+        PassiveAnalyzer analyzer = ConfigureDrawerFragment.analyzer;
         List<Records> recordsList = analyzer.getMyRecordsList();
-
-        if (recordsList.size() > 0){
-            double forceReference = getIntent().getDoubleExtra("force",0);
+        if (recordsList.size() > 0) {
+            double forceReference = getIntent().getDoubleExtra("force", 0);
             int[] startEndIndex = getIntent().getIntArrayExtra("startEndIndex");
-            int start = 0,end = 0;
-            if (startEndIndex != null) {
-                start = startEndIndex[0];
-                end  = startEndIndex[1];
+            Date startDate = new Date(startEndIndex[0]-1900 , startEndIndex[1]-1, startEndIndex[2], startEndIndex[3], startEndIndex[4]);
+            Date endDate = new Date(startEndIndex[5]-1900 , startEndIndex[6]-1, startEndIndex[7], startEndIndex[8], startEndIndex[9]);
+            int counter = 0;
+            for (int i = 0; i < recordsList.size(); i++) {
+                if (!recordsList.get(i).isHeader) {
+                    NonHeaderRecords nonHeaderRecords = (NonHeaderRecords) recordsList.get(i);
+                    if (nonHeaderRecords.compareTo(startDate) >= 0 && nonHeaderRecords.compareTo(endDate) <= 0) {
+                        float force = nonHeaderRecords.getAverageForceVal();
+                        if (force <= 0.1 * forceReference) {
+                            noCounter++;
+                        } else if ((force <= 0.8 * forceReference) && (0.1 * forceReference < force)) {
+                            belowCounter++;
+                        } else if ((force <= 1.2 * forceReference) && (0.8 * forceReference < force)) {
+                            onCounter++;
+                        } else {
+                            overCounter++;
+                        }
+                        counter++;
+                    }
+                }
             }
-            for (int i = start;i<end;i++){
-                Double force = recordsList.get(i).getAverageForceVal();
-                if (force <= 0.1*forceReference){
-                    noCounter++;
+            if (counter > 0) {
+                percentage[0] = (double) noCounter / counter * 100;
+                percentage[1] = (double) belowCounter / counter * 100;
+                percentage[2] = (double) onCounter / counter * 100;
+                percentage[3] = (double) overCounter / counter * 100;
+                for (int j = 0; j < 4; j++) {
+                    percentage[j] = Math.round(percentage[j] * 100.0) / 100.0;
                 }
-                else if ((force <= 0.8*forceReference) && (0.1*forceReference < force )){
-                    belowCounter++;
-                }
-                else if ((force  <= 1.2* forceReference) && (0.8*forceReference < force )){
-                    onCounter++;
-                }
-                else{
-                    overCounter++;
-                }
+                return true;
             }
-
-            percentage[0] = (double)noCounter/(end-start)*100;
-            percentage[1] = (double)belowCounter/(end-start)*100;
-            percentage[2] = (double)onCounter/(end-start)*100;
-            percentage[3] = (double)overCounter/(end-start)*100;
-
-            for (int j =0;j<4;j++){
-                percentage[j] = Math.round(percentage[j] * 100.0) / 100.0;
-            }
-            return true;
         }
 
         return false;
     }
-
 
 }

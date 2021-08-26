@@ -16,9 +16,11 @@ import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Analyzer;
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.NonHeaderRecords;
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.PassiveAnalyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Records;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Fragments.ConfigureDrawerFragment;
 
@@ -113,41 +115,42 @@ public class ForceTemperaturePlotActivity extends Activity {
         renderer.setDisplayValues(true);
     }
 
-
     private boolean calPercentageData(){
-        Analyzer analyzer = ConfigureDrawerFragment.analyzer;
+        PassiveAnalyzer analyzer = ConfigureDrawerFragment.analyzer;
         List<Records> recordsList = analyzer.getMyRecordsList();
         if (recordsList.size() > 0){
             double forceReference = getIntent().getDoubleExtra("force",0);
             double temperatureReference = getIntent().getDoubleExtra("temperature",0);
-            int[] startEndIndex = getIntent().getIntArrayExtra("startEndIndex");
-            int start = 0,end = 0;
-            if (startEndIndex != null) {
-                start = startEndIndex[0];
-                end  = startEndIndex[1];
-            }
-            for (int i = start;i<end;i++){
-                Double temperature = recordsList.get(i).getAverageTempVal();
-                Double force = recordsList.get(i).getAverageForceVal();
-
-                if (temperature >= temperatureReference && force>=forceReference){
-                    onCounter++;
+            int[] startEndDateTime = getIntent().getIntArrayExtra("startEndIndex");
+            Date startDate = new Date (startEndDateTime[0]-1900 ,startEndDateTime[1]-1,startEndDateTime[2],startEndDateTime[3],startEndDateTime[4]);
+            Date endDate = new Date (startEndDateTime[5]-1900 ,startEndDateTime[6]-1,startEndDateTime[7],startEndDateTime[8],startEndDateTime[9]);
+            int counter = 0;
+            for (int i = 0;i<recordsList.size();i++){
+                if (!recordsList.get(i).isHeader) {
+                    NonHeaderRecords nonHeaderRecords = (NonHeaderRecords) recordsList.get(i);
+                    if (nonHeaderRecords.compareTo(startDate) >= 0 && nonHeaderRecords.compareTo(endDate) <= 0){
+                        float temperature =nonHeaderRecords.getAverageTempVal();
+                        float force =nonHeaderRecords.getAverageForceVal();
+                        if (temperature >= temperatureReference && force >= forceReference){
+                            onCounter++;
+                        }
+                        else{
+                            noCounter++;
+                        }
+                        counter++;
+                    }
                 }
-                else{
-                    noCounter++;
+            }
+            if (counter > 0){
+                percentage[0] = (double)noCounter/counter*100;
+                percentage[1] = (double)onCounter/counter*100;
+                for (int j =0;j<2;j++){
+                    percentage[j] = Math.round(percentage[j] * 100.0) / 100.0;
                 }
+                return true;
             }
-
-            percentage[0] = (double)noCounter/(end-start)*100;
-            percentage[1] = (double)onCounter/(end-start)*100;
-
-
-            for (int j =0;j<2;j++){
-                percentage[j] = Math.round(percentage[j] * 100.0) / 100.0;
-            }
-            return true;
         }
-
         return false;
     }
+
 }

@@ -220,7 +220,7 @@ public class OutPutDataFragment extends PreferenceFragment {
             }
 
             else if (Constants.ACTION_DATA_DOWNLOAD.equals(action)) {
-                double length = intent.getDoubleExtra(Constants.ACTION_DATA_DOWNLOAD,0);
+                int length = intent.getIntExtra(Constants.ACTION_DATA_DOWNLOAD,0);
                 downloadedSize += length;
                 Log.v("downloadedSize",downloadedSize+"");
                 if (getActivity() != null) {

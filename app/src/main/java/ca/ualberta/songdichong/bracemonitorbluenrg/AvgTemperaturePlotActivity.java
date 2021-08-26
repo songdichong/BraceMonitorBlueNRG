@@ -18,21 +18,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Analyzer;
-import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Days;
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.NonHeaderRecords;
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.PassiveAnalyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Records;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.TimeWithinDay;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Fragments.ConfigureDrawerFragment;
 
 
 public class AvgTemperaturePlotActivity extends Activity {
-    Map<TimeWithinDay, List<Double>> DailyTemperatures = new HashMap<>();
+    Map<TimeWithinDay, List<Float>> DailyTemperatures = new HashMap<>();
     double max = 0.0;
     List<Date> xAxis = new ArrayList<>();
-    List<Double> yAxis = new ArrayList<>();
+    List<Float> yAxis = new ArrayList<>();
     Date startTime;
     Date endTime;
     @Override
@@ -104,36 +102,39 @@ public class AvgTemperaturePlotActivity extends Activity {
     }
 
     private void calLinePlotData(){
-        Analyzer analyzer = ConfigureDrawerFragment.analyzer;
+        PassiveAnalyzer analyzer = ConfigureDrawerFragment.analyzer;
         int[] startEndIndex = getIntent().getIntArrayExtra("startEndIndex");
-        int start = startEndIndex[0];
-        int end  = startEndIndex[1];
+
+        Date startDate = new Date (startEndIndex[0] -1900 ,startEndIndex[1] - 1,startEndIndex[2],startEndIndex[3],startEndIndex[4]);
+        Date endDate = new Date (startEndIndex[5]-1900 ,startEndIndex[6]-1,startEndIndex[7],startEndIndex[8],startEndIndex[9]);
         List<Records> recordsList = analyzer.getMyRecordsList();
-        for (int counter = start; counter < end; counter++){
-            Records rec = recordsList.get(counter);
-            if (!rec.isHeader){
-                List<Double> vals =DailyTemperatures.getOrDefault(new TimeWithinDay(rec.time),new ArrayList<Double>());
-                vals.add(rec.getTempVal());
-                DailyTemperatures.put(new TimeWithinDay(rec.time),vals);
+        startTime= new Date (startEndIndex[0]-1900  ,startEndIndex[1] - 1,startEndIndex[2],0,0);
+        endTime = new Date (startEndIndex[0] -1900 ,startEndIndex[1] - 1,startEndIndex[2]+1,0,0);
+        for (int i = 0;i<recordsList.size();i++){
+            if (!recordsList.get(i).isHeader) {
+                NonHeaderRecords nonHeaderRecords = (NonHeaderRecords) recordsList.get(i);
+                if (nonHeaderRecords.compareTo(startDate) >= 0 && nonHeaderRecords.compareTo(endDate) <= 0) {
+                    List<Float> vals = DailyTemperatures.getOrDefault(new TimeWithinDay(nonHeaderRecords.getTime()),new ArrayList<Float>());
+                    vals.add(nonHeaderRecords.getTempVal());
+                    DailyTemperatures.put(new TimeWithinDay(nonHeaderRecords.getTime()),vals);
+                }
             }
         }
-        startTime = new Date(recordsList.get(start).getYear()-1900,recordsList.get(start).getMonth()-1,recordsList.get(start).getDate());
-        endTime = new Date(recordsList.get(start).getYear()-1900,recordsList.get(start).getMonth()-1,recordsList.get(start).getDate()+1);
-        for (Map.Entry<TimeWithinDay, List<Double>> entry : DailyTemperatures.entrySet()) {
-            Date dt = new Date(recordsList.get(start).getYear()-1900,recordsList.get(start).getMonth()-1,
-                    recordsList.get(start).getDate(),entry.getKey().getHour(),entry.getKey().getMin());
-            Double averageY = calculateAverage(entry.getValue());
+        for (Map.Entry<TimeWithinDay, List<Float>> entry : DailyTemperatures.entrySet()) {
+            Date dt = new Date(startEndIndex[0]-1900,startEndIndex[1]-1,startEndIndex[2],entry.getKey().getHour(),entry.getKey().getMin());
+            float averageY = calculateAverage(entry.getValue());
             xAxis.add(dt);
             yAxis.add(averageY);
         }
-        for (Double y:yAxis){
+        for (Float y:yAxis){
             if (max<y) max = y;
         }
     }
-    private double calculateAverage(List <Double> marks) {
-        Double sum = 0.;
+
+    private float calculateAverage(List <Float> marks) {
+        float sum = 0;
         if(!marks.isEmpty()) {
-            for (Double mark : marks) {
+            for (Float mark : marks) {
                 sum += mark;
             }
             return sum / marks.size();

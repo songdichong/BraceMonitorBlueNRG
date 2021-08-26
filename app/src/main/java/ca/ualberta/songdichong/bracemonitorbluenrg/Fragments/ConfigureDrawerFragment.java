@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.TimePickerDialog;
-import android.bluetooth.BluetoothGatt;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,13 +24,15 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.Date;
 
 import ca.ualberta.songdichong.bracemonitorbluenrg.AvgForcePlotActivity;
 import ca.ualberta.songdichong.bracemonitorbluenrg.AvgTemperaturePlotActivity;
 import ca.ualberta.songdichong.bracemonitorbluenrg.BluetoothLeService;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Constants;
-import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Analyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Days;
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.NonHeaderRecords;
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.PassiveAnalyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Records;
 import ca.ualberta.songdichong.bracemonitorbluenrg.ForcePlotActivity;
 import ca.ualberta.songdichong.bracemonitorbluenrg.ForceTemperaturePlotActivity;
@@ -39,7 +40,7 @@ import ca.ualberta.songdichong.bracemonitorbluenrg.R;
 import ca.ualberta.songdichong.bracemonitorbluenrg.TemperaturePlotActivity;
 
 public class ConfigureDrawerFragment extends Fragment {
-    static public Analyzer analyzer;
+    static public PassiveAnalyzer analyzer;
     TextView startDateTime;
     TextView endDateTime;
     EditText referenceForceValue;
@@ -87,9 +88,9 @@ public class ConfigureDrawerFragment extends Fragment {
         if (BluetoothLeService.downloadedData.size() == 0 ){
             Log.v("123","0");
             File file = new File(Environment.getExternalStorageDirectory(), Constants.FILENAME);
-            analyzer = new Analyzer(file);
+            analyzer = new PassiveAnalyzer(file);
         }else{
-            analyzer = new Analyzer(BluetoothLeService.downloadedData);
+            analyzer = new PassiveAnalyzer(BluetoothLeService.downloadedData);
         }
 
         if (analyzer.getMyDaysList().size() == 0){
@@ -133,24 +134,23 @@ public class ConfigureDrawerFragment extends Fragment {
                 public void onClick(View view) {
                     Intent intent = new Intent(getActivity(), ForcePlotActivity.class);
                     intent.putExtra("force", force);
-                    int[] startTime = new int[5];
+                    int[] startTime = new int[10];
                     startTime[0] = startYear;
                     startTime[1] = startMonth;
                     startTime[2] = startDayofMonth;
                     startTime[3] = startHourofDay;
                     startTime[4] = startMinuteofHour;
-                    int[] endTime = new int[5];
-                    endTime[0] = endYear;
-                    endTime[1] = endMonth;
-                    endTime[2] = endDayofMonth;
-                    endTime[3] = endHourofDay;
-                    endTime[4] = endMinuteofHour;
-                    int[] startEndIndex = analyzer.getStartEndIndex(startTime,endTime);
-                    if ( startEndIndex[1] == 0 || startEndIndex[0]>startEndIndex[1]){
+                    startTime[5] = endYear;
+                    startTime[6] = endMonth;
+                    startTime[7] = endDayofMonth;
+                    startTime[8] = endHourofDay;
+                    startTime[9] = endMinuteofHour;
+                    Date start = new Date(startYear,startMonth,startDayofMonth,startHourofDay,startMinuteofHour);
+                    Date end = new Date(endYear,endMonth,endDayofMonth,endHourofDay,endMinuteofHour);
+                    if (start.compareTo(end) >= 0){
                         Toast.makeText(getContext(), "Date selection is invalid.", Toast.LENGTH_LONG).show();
                     }else{
-                        intent.putExtra("startEndIndex",startEndIndex);
-
+                        intent.putExtra("startEndIndex",startTime);
                         startActivity(intent);
                     }
                 }
@@ -161,23 +161,23 @@ public class ConfigureDrawerFragment extends Fragment {
                 public void onClick(View view) {
                     Intent intent = new Intent(getActivity(), TemperaturePlotActivity.class);
                     intent.putExtra("temperature", temperature);
-                    int[] startTime = new int[5];
+                    int[] startTime = new int[10];
                     startTime[0] = startYear;
                     startTime[1] = startMonth;
                     startTime[2] = startDayofMonth;
                     startTime[3] = startHourofDay;
                     startTime[4] = startMinuteofHour;
-                    int[] endTime = new int[5];
-                    endTime[0] = endYear;
-                    endTime[1] = endMonth;
-                    endTime[2] = endDayofMonth;
-                    endTime[3] = endHourofDay;
-                    endTime[4] = endMinuteofHour;
-                    int[] startEndIndex = analyzer.getStartEndIndex(startTime,endTime);
-                    if (startEndIndex[1] == 0 || startEndIndex[0]>startEndIndex[1]){
+                    startTime[5] = endYear;
+                    startTime[6] = endMonth;
+                    startTime[7] = endDayofMonth;
+                    startTime[8] = endHourofDay;
+                    startTime[9] = endMinuteofHour;
+                    Date start = new Date(startYear,startMonth,startDayofMonth,startHourofDay,startMinuteofHour);
+                    Date end = new Date(endYear,endMonth,endDayofMonth,endHourofDay,endMinuteofHour);
+                    if (start.compareTo(end) >= 0){
                         Toast.makeText(getContext(), "Date selection is invalid", Toast.LENGTH_LONG).show();
                     }else{
-                        intent.putExtra("startEndIndex",startEndIndex);
+                        intent.putExtra("startEndIndex",startTime);
                         startActivity(intent);
                     }
                 }
@@ -189,23 +189,23 @@ public class ConfigureDrawerFragment extends Fragment {
                     Intent intent = new Intent(getActivity(), ForceTemperaturePlotActivity.class);
                     intent.putExtra("temperature", temperature);
                     intent.putExtra("force", force);
-                    int[] startTime = new int[5];
+                    int[] startTime = new int[10];
                     startTime[0] = startYear;
                     startTime[1] = startMonth;
                     startTime[2] = startDayofMonth;
                     startTime[3] = startHourofDay;
                     startTime[4] = startMinuteofHour;
-                    int[] endTime = new int[5];
-                    endTime[0] = endYear;
-                    endTime[1] = endMonth;
-                    endTime[2] = endDayofMonth;
-                    endTime[3] = endHourofDay;
-                    endTime[4] = endMinuteofHour;
-                    int[] startEndIndex = analyzer.getStartEndIndex(startTime,endTime);
-                    if (startEndIndex[1] == 0 || startEndIndex[0]>startEndIndex[1]){
+                    startTime[5] = endYear;
+                    startTime[6] = endMonth;
+                    startTime[7] = endDayofMonth;
+                    startTime[8] = endHourofDay;
+                    startTime[9] = endMinuteofHour;
+                    Date start = new Date(startYear,startMonth,startDayofMonth,startHourofDay,startMinuteofHour);
+                    Date end = new Date(endYear,endMonth,endDayofMonth,endHourofDay,endMinuteofHour);
+                    if (start.compareTo(end) >= 0){
                         Toast.makeText(getContext(), "Date selection is invalid", Toast.LENGTH_LONG).show();
                     }else{
-                        intent.putExtra("startEndIndex",startEndIndex);
+                        intent.putExtra("startEndIndex",startTime);
                         startActivity(intent);
                     }
                 }
@@ -216,23 +216,23 @@ public class ConfigureDrawerFragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(getActivity(), AvgForcePlotActivity.class);
-                    int[] startTime = new int[5];
+                    int[] startTime = new int[10];
                     startTime[0] = startYear;
                     startTime[1] = startMonth;
                     startTime[2] = startDayofMonth;
                     startTime[3] = startHourofDay;
                     startTime[4] = startMinuteofHour;
-                    int[] endTime = new int[5];
-                    endTime[0] = endYear;
-                    endTime[1] = endMonth;
-                    endTime[2] = endDayofMonth;
-                    endTime[3] = endHourofDay;
-                    endTime[4] = endMinuteofHour;
-                    int[] startEndIndex = analyzer.getStartEndIndex(startTime,endTime);
-                    if ( startEndIndex[1] == 0 || startEndIndex[0]>startEndIndex[1]){
+                    startTime[5] = endYear;
+                    startTime[6] = endMonth;
+                    startTime[7] = endDayofMonth;
+                    startTime[8] = endHourofDay;
+                    startTime[9] = endMinuteofHour;
+                    Date start = new Date(startYear,startMonth,startDayofMonth,startHourofDay,startMinuteofHour);
+                    Date end = new Date(endYear,endMonth,endDayofMonth,endHourofDay,endMinuteofHour);
+                    if (start.compareTo(end) >= 0){
                         Toast.makeText(getContext(), "Date selection is invalid", Toast.LENGTH_LONG).show();
                     }else{
-                        intent.putExtra("startEndIndex",startEndIndex);
+                        intent.putExtra("startEndIndex",startTime);
                         startActivity(intent);
                     }
                 }
@@ -242,23 +242,23 @@ public class ConfigureDrawerFragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(getActivity(), AvgTemperaturePlotActivity.class);
-                    int[] startTime = new int[5];
+                    int[] startTime = new int[10];
                     startTime[0] = startYear;
                     startTime[1] = startMonth;
                     startTime[2] = startDayofMonth;
                     startTime[3] = startHourofDay;
                     startTime[4] = startMinuteofHour;
-                    int[] endTime = new int[5];
-                    endTime[0] = endYear;
-                    endTime[1] = endMonth;
-                    endTime[2] = endDayofMonth;
-                    endTime[3] = endHourofDay;
-                    endTime[4] = endMinuteofHour;
-                    int[] startEndIndex = analyzer.getStartEndIndex(startTime,endTime);
-                    if ( startEndIndex[1] == 0 || startEndIndex[0]>startEndIndex[1]){
+                    startTime[5] = endYear;
+                    startTime[6] = endMonth;
+                    startTime[7] = endDayofMonth;
+                    startTime[8] = endHourofDay;
+                    startTime[9] = endMinuteofHour;
+                    Date start = new Date(startYear,startMonth,startDayofMonth,startHourofDay,startMinuteofHour);
+                    Date end = new Date(endYear,endMonth,endDayofMonth,endHourofDay,endMinuteofHour);
+                    if (start.compareTo(end) >= 0){
                         Toast.makeText(getContext(), "Date selection is invalid", Toast.LENGTH_LONG).show();
                     }else{
-                        intent.putExtra("startEndIndex",startEndIndex);
+                        intent.putExtra("startEndIndex",startTime);
                         startActivity(intent);
                     }
                 }
@@ -280,13 +280,9 @@ public class ConfigureDrawerFragment extends Fragment {
 
     public void setStartEndDateTime(){
         //downloaded data --> file --> nothing
-        Days startDay = analyzer.getMyDaysList().get(0);
-        Log.v("startDay",startDay.toString());
-        Days endDay = analyzer.getMyDaysList().get(analyzer.getMyDaysList().size()-1);
-        Log.v("endDay",endDay.toString());
-        if (startDay.compareTo(endDay) > 0){
+        if (analyzer.isBlankData()){
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setMessage("Some data are corrupted. The analyzer will analyze up to the last correct data.")
+            builder.setMessage("Some data are corrupted. The analyzer will analyze the correct data only.")
                     .setCancelable(false)
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
@@ -297,32 +293,40 @@ public class ConfigureDrawerFragment extends Fragment {
                     .setIcon(getResources().getDrawable(android.R.drawable.ic_dialog_alert));
             AlertDialog alert = builder.create();
             alert.show();
-            if ( analyzer.getMyDaysList().size() > 1){
-                for (int i = 1; i < analyzer.getMyDaysList().size(); i++){
-                    Days currentDay = analyzer.getMyDaysList().get(i);
-                    Days previousDay = analyzer.getMyDaysList().get(i-1);
-                    if (currentDay.compareTo(previousDay) < 0){
-                        endDay = previousDay;
-                    }
-                }
-            } else{
-                endDay = startDay;
+        }
+
+        NonHeaderRecords startRecord = null, endRecord = null;
+        for (int i = 0; i < analyzer.getMyRecordsList().size(); i++){
+            Records current = analyzer.getMyRecordsList().get(i);
+            if (!current.isHeader) {
+                startRecord = (NonHeaderRecords) current;
+                break;
             }
         }
-        Records startRecord = startDay.getRecordsList().get(0);
-        Records endRecord = endDay.getRecordsList().get(endDay.getRecordsList().size()-1);
+        for (int i = analyzer.getMyRecordsList().size()-1; i >= 0; i--){
+            Records current = analyzer.getMyRecordsList().get(i);
+            if (!current.isHeader) {
+                endRecord = (NonHeaderRecords) current;
+                break;
+            }
+        }
 
-        startYear = startRecord.getYear();
-        startMonth = startRecord.getMonth();
-        startDayofMonth = startRecord.getDate();
-        startHourofDay = startRecord.getHour();
-        startMinuteofHour = startRecord.getMinute();
+        if (startRecord != null){
+            startYear = startRecord.getDate().getYear()+1900;
+            startMonth = startRecord.getDate().getMonth()+1;
+            startDayofMonth = startRecord.getDate().getDate();
+            startHourofDay = startRecord.getDate().getHours();
+            startMinuteofHour = startRecord.getDate().getMinutes();
+        }
 
-        endYear = endRecord.getYear();
-        endMonth = endRecord.getMonth();
-        endDayofMonth = endRecord.getDate();
-        endHourofDay = endRecord.getHour();
-        endMinuteofHour = endRecord.getMinute();
+        if (endRecord != null){
+            endYear = endRecord.getDate().getYear()+1900;
+            endMonth = endRecord.getDate().getMonth()+1;
+            endDayofMonth = endRecord.getDate().getDate();
+            endHourofDay = endRecord.getDate().getHours();
+            endMinuteofHour = endRecord.getDate().getMinutes();
+        }
+
 
         Calendar cal = Calendar.getInstance();
         cal.set(startYear,startMonth-1,startDayofMonth);

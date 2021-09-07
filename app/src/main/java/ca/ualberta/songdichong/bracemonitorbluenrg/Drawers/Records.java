@@ -16,8 +16,5 @@ import java.util.Objects;
 public abstract class Records {
     public boolean isHeader = false;
 
-    public String getHeaderString(boolean isActive)
-    {
-        return null;
-    }
+    public abstract String getString(boolean isActive);
 }

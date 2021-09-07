@@ -1167,7 +1167,7 @@ public class BluetoothLeService {
     public void FormatDownloadedData_Active(byte[] arrays){
         int index = 0;
         int[] maxDays = {31,28,31,30,31,30,31,31,30,31,30,31};
-        while(index < arrays.length){
+        while(index < arrays.length-1){
             if ((arrays.length >= (index+12)) && (arrays[index] == -18) && (arrays[index+1] == -18)){
                 //So the next 6 bytes are time info: year month day hour minute sampleRate
                 //Then next 8 bytes are holder subject number MSD, holder LSD, target force digit, target force decimal
@@ -1378,15 +1378,11 @@ public class BluetoothLeService {
             for (int i = 0; i < data.size(); i++) {
                 Records rec = data.get(i);
                 if (rec.isHeader){
-                    String output = ((HeaderRecords)rec).getHeaderString(false);
+                    String output = ((HeaderRecords)rec).getString(false);
                     out.write(output.getBytes());
                 }else{
                     NonHeaderRecords record = (NonHeaderRecords) rec;
-                    String[] outputArray = new String[]{String.format("%.1f",record.getForceVal()),String.format("%.1f",record.getTempVal()),
-                            String.valueOf(record.getDate().getYear()), String.valueOf(record.getDate().getMonth()+1),
-                            String.valueOf(record.getDate().getDate()),String.valueOf(record.getDate().getHours()),
-                            String.valueOf(record.getDate().getMinutes())};
-                    String output = Arrays.toString(outputArray);
+                    String output = record.getString(false);
                     out.write(output.substring(1, output.length() - 1).getBytes());
                     out.write('\n');
                 }
@@ -1412,15 +1408,11 @@ public class BluetoothLeService {
             for (int i = 0; i < data.size(); i++) {
                 Records rec = data.get(i);
                 if (rec.isHeader){
-                    String output = ((HeaderRecords)rec).getHeaderString(true);
+                    String output = ((HeaderRecords)rec).getString(true);
                     out.write(output.getBytes());
                 }else{
                     NonHeaderRecords record = (NonHeaderRecords) rec;
-                    String[] outputArray = new String[]{String.format("%.1f",record.getForceVal()),String.format("%.1f",record.getTempVal()),
-                            String.valueOf(record.getLongTermFlag()),String.valueOf(record.getDate().getYear()),
-                            String.valueOf(record.getDate().getMonth()+1),String.valueOf(record.getDate().getDate()),
-                            String.valueOf(record.getDate().getHours()),String.valueOf(record.getDate().getMinutes())};
-                    String output = Arrays.toString(outputArray);
+                    String output = record.getString(true);
                     out.write(output.substring(1, output.length() - 1).getBytes());
                     out.write('\n');
                 }

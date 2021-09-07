@@ -24,7 +24,7 @@ public class HeaderRecords extends Records {
     }
 
     @Override
-    public String getHeaderString(boolean isActive)
+    public String getString(boolean isActive)
     {
         if (isActive){
             return "Subject number: " + subjectNumber + " Target Pressure (mmHg): " + targetPressure +
@@ -32,9 +32,6 @@ public class HeaderRecords extends Records {
 
         }else {
             return "Subject number: " + subjectNumber + " Target Force (N): " + String.format("%.2f",targetForce) + " Sample rate: " + sampleRate + "\n";
-
         }
     }
-
-
 }

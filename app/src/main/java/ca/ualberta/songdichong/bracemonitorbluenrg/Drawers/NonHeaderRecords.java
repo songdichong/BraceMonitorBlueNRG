@@ -1,13 +1,11 @@
 package ca.ualberta.songdichong.bracemonitorbluenrg.Drawers;
 
+import java.util.Arrays;
 import java.util.Date;
 
 public abstract class NonHeaderRecords extends Records implements Comparable<Date>{
-
-
     Integer longTermFlag = null;
     Date date = null;
-
     float forceVal;
     float tempVal;
     float averageForceVal;
@@ -20,7 +18,6 @@ public abstract class NonHeaderRecords extends Records implements Comparable<Dat
     public int[] getTime(){
         return new int[]{date.getHours(),date.getMinutes()};
     }
-
 
     public float getForceVal() {
         return forceVal;
@@ -58,8 +55,29 @@ public abstract class NonHeaderRecords extends Records implements Comparable<Dat
     public int compareTo(Date o) {
         return this.date.compareTo(o);
     }
+
     public Integer getLongTermFlag() {
         return longTermFlag;
     }
 
+    @Override
+    public String getString(boolean isActive)
+    {
+        if (isActive){
+            String[] outputArray = new String[]{String.format("%.1f",forceVal),String.format("%.1f",tempVal),
+                    String.valueOf(date.getYear()+1900), String.valueOf(date.getMonth()+1),
+                    String.valueOf(date.getDate()),String.valueOf(date.getHours()),
+                    String.valueOf(date.getMinutes())};
+            String output = Arrays.toString(outputArray);
+            return output;
+        }else {
+            String[] outputArray = new String[]{String.format("%.1f",forceVal),String.format("%.1f",tempVal),
+                    String.valueOf(longTermFlag),
+                    String.valueOf(date.getYear()+1900), String.valueOf(date.getMonth()+1),
+                    String.valueOf(date.getDate()),String.valueOf(date.getHours()),
+                    String.valueOf(date.getMinutes())};
+            String output = Arrays.toString(outputArray);
+            return output;
+        }
+    }
 }

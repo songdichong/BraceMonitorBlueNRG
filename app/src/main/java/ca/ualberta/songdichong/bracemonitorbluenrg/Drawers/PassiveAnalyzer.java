@@ -73,8 +73,8 @@ public class PassiveAnalyzer {
                     {
                         header = line.split("[\\s:]+");
                         String subject_number_string = header[2];
-                        String target_force_string = header[6];
-                        String sample_rate_string = header[9];
+                        String target_force_string = header.length==10? header[6]:header[5];
+                        String sample_rate_string = header.length==10? header[9]:header[8];
                         subjectNumber = Integer.parseInt(subject_number_string);
                         targetForce = Float.parseFloat(target_force_string);
                         sampleRate = Integer.parseInt(sample_rate_string);

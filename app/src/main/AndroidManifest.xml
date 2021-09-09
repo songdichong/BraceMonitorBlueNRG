@@ -28,6 +28,7 @@
         <activity android:name="ca.ualberta.songdichong.bracemonitorbluenrg.ForceTemperaturePlotActivity"/>
         <activity android:name="ca.ualberta.songdichong.bracemonitorbluenrg.AvgForcePlotActivity"/>
         <activity android:name="ca.ualberta.songdichong.bracemonitorbluenrg.AvgTemperaturePlotActivity"/>
+        <activity android:name="ca.ualberta.songdichong.bracemonitorbluenrg.AdjustmentHistoryActivity"/>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="ca.ualberta.songdichong.bracemonitorbluenrg.fileprovider"

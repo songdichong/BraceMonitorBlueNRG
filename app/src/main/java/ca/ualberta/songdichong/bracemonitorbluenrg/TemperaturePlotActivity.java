@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Analyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.NonHeaderRecords;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.PassiveAnalyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Records;
@@ -115,7 +116,7 @@ public class TemperaturePlotActivity extends Activity {
     }
 
     private boolean calPercentageData(){
-        PassiveAnalyzer analyzer = ConfigureDrawerFragment.analyzer;
+        Analyzer analyzer = ConfigureDrawerFragment.analyzer;
         List<Records> recordsList = analyzer.getMyRecordsList();
         if (recordsList.size() > 0){
             double temperatureReference = getIntent().getDoubleExtra("temperature",0);

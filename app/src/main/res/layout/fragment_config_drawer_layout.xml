@@ -117,6 +117,14 @@
             android:layout_below="@+id/reference_temperature_value_title"
             android:layout_centerInParent="true"/>
 
+        <Switch
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/mode_switch"
+            android:text="Active mode"
+            android:layout_marginLeft="10dp"
+            android:textSize="20dp"
+            android:layout_below="@+id/reference_temperature_value"/>
 
         <ImageButton
             android:id="@+id/config_reference_temperature_value_button"
@@ -132,7 +140,7 @@
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:text="Force Compliance"
-            android:layout_below="@+id/reference_temperature_value"
+            android:layout_below="@+id/mode_switch"
             android:layout_marginTop="30dp"
             android:background="@color/orange_color"
             android:layout_centerInParent="true"/>
@@ -172,6 +180,16 @@
             android:layout_below="@+id/draw_avg_force_plot_button"
             android:layout_alignStart="@+id/draw_force_plot_button"
             android:background="@color/red_color" />
+
+        <Button
+            android:id="@+id/show_adjustment_enabled_button"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="Auto-adjustment Detail"
+            android:enabled="false"
+            android:layout_below="@+id/draw_avg_temperature_plot_button"
+            android:layout_alignStart="@+id/draw_force_plot_button"
+            android:background="@color/light_green_color" />
     </RelativeLayout>
 
 </LinearLayout>

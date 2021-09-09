@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Analyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.NonHeaderRecords;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.PassiveAnalyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Records;
@@ -47,7 +48,12 @@ public class AvgForcePlotActivity extends Activity  {
     public XYMultipleSeriesDataset getTruitonDataset() {
         XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
         ArrayList<String> legendTitles = new ArrayList<String>();
-        legendTitles.add("Daily Average Force Values");
+        if (ConfigureDrawerFragment.getAnalyzeMode() == 1){
+            legendTitles.add("Daily Average Pressure Values");
+        } else{
+            legendTitles.add("Daily Average Force Values");
+        }
+
         TimeSeries series = new TimeSeries(legendTitles.get(0));
         for (int i = 0; i < xAxis.size();i++){
             series.add(xAxis.get(i),yAxis.get(i));
@@ -58,7 +64,13 @@ public class AvgForcePlotActivity extends Activity  {
     }
 
     public void myChartSettings(XYMultipleSeriesRenderer renderer) {
-        renderer.setChartTitle("Daily Average Force Values");
+        if (ConfigureDrawerFragment.getAnalyzeMode() == 1){
+            renderer.setChartTitle("Daily Average Pressure Values");
+            renderer.setYTitle("Average Pressure(mmHg)");
+        } else{
+            renderer.setChartTitle("Daily Average Force Values");
+            renderer.setYTitle("Average Force(N)");
+        }
 
         renderer.setXAxisMin(startTime.getTime());
         Log.v("start",String.valueOf(startTime.getTime()));
@@ -77,7 +89,7 @@ public class AvgForcePlotActivity extends Activity  {
 
         renderer.setYLabelsAlign(Paint.Align.RIGHT);
         renderer.setXTitle("Time of Day(HH)");
-        renderer.setYTitle("Average Force(N)");
+
         renderer.setShowGrid(true);
         renderer.setGridColor(Color.GRAY);
         renderer.setXLabels(0); // sets the number of integer labels to appear
@@ -102,7 +114,7 @@ public class AvgForcePlotActivity extends Activity  {
     }
 
     private void calLinePlotData(){
-        PassiveAnalyzer analyzer = ConfigureDrawerFragment.analyzer;
+        Analyzer analyzer = ConfigureDrawerFragment.analyzer;
         int[] startEndIndex = getIntent().getIntArrayExtra("startEndIndex");
 
         Date startDate = new Date (startEndIndex[0]-1900 ,startEndIndex[1] - 1,startEndIndex[2],startEndIndex[3],startEndIndex[4]);

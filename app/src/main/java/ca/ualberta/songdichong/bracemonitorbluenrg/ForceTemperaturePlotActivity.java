@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Analyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.NonHeaderRecords;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.PassiveAnalyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Records;
@@ -99,7 +100,11 @@ public class ForceTemperaturePlotActivity extends Activity {
     }
 
     public void myChartSettings(XYMultipleSeriesRenderer renderer) {
-        renderer.setChartTitle("Force and Temperature Compliance Measurement");
+        if (ConfigureDrawerFragment.getAnalyzeMode() == 1) {
+            renderer.setChartTitle("Pressure and Temperature Compliance");
+        } else{
+            renderer.setChartTitle("Force and Temperature Compliance");
+        }
         renderer.setXAxisMin(0.9);
         renderer.setXAxisMax(1.1);
         renderer.setYAxisMin(0);
@@ -116,7 +121,7 @@ public class ForceTemperaturePlotActivity extends Activity {
     }
 
     private boolean calPercentageData(){
-        PassiveAnalyzer analyzer = ConfigureDrawerFragment.analyzer;
+        Analyzer analyzer = ConfigureDrawerFragment.analyzer;
         List<Records> recordsList = analyzer.getMyRecordsList();
         if (recordsList.size() > 0){
             double forceReference = getIntent().getDoubleExtra("force",0);

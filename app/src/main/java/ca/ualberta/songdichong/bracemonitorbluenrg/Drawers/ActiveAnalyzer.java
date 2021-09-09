@@ -1,27 +1,17 @@
 package ca.ualberta.songdichong.bracemonitorbluenrg.Drawers;
-        ;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * @author songdichong
- *
- * @object Analyzer: analyze the given file or downloaded data and get analyzer object in order to draw graph
- *
- * @constructor     1.downloadedData: List<String[]> from BluetoothLeService.
- *             or:  2.file: txt file where data are recorded
- *
- * @infomation List<Drawers.Days>
- *
- * @usage ConfigDrawerFragment
- */
-public class PassiveAnalyzer extends Analyzer {
+public class ActiveAnalyzer extends Analyzer {
+    private int allowance;
+    List<Records> adjustmentRecordsList;
     //use the file in the directory to generate analyzer class
-    public PassiveAnalyzer(File file){
+    public ActiveAnalyzer(File file){
         myDaysList = new ArrayList<>();
         myRecordsList = new ArrayList<>();
         try {
@@ -33,17 +23,19 @@ public class PassiveAnalyzer extends Analyzer {
             line = br.readLine();
             //start with third line
             while ((line = br.readLine()) != null) {
-                if (line.isEmpty()) continue;
+                if (line.isEmpty() || line.split(",").length==0) continue;
+
                 try{
-                    String[] values = line.split(", ");
+                    String[] values = line.split("\\s*,\\s*");
                     float force = Float.parseFloat(values[0]);
                     float temperature = Float.parseFloat(values[1]);
-                    int year = Integer.parseInt(values[2]);
-                    int month = Integer.parseInt(values[3]);
-                    int day = Integer.parseInt(values[4]);
-                    int hour = Integer.parseInt(values[5]);
-                    int minute = Integer.parseInt(values[6]);
-                    NonHeaderRecords myRecords = new PassiveRecords(year,month,day,hour,minute,force,temperature);
+                    int longTermFlag = Integer.parseInt(values[2]);
+                    int year = Integer.parseInt(values[3]);
+                    int month = Integer.parseInt(values[4]);
+                    int day = Integer.parseInt(values[5]);
+                    int hour = Integer.parseInt(values[6]);
+                    int minute = Integer.parseInt(values[7]);
+                    NonHeaderRecords myRecords = new ActiveRecords(year,month,day,hour,minute,force,temperature,longTermFlag);
                     if (myRecords.getDate() != null){
                         downloadedData.add(myRecords);
                     }
@@ -53,17 +45,18 @@ public class PassiveAnalyzer extends Analyzer {
                 }
                 //either NumberFormatException or ArrayIndexOutOfBoundsException
                 catch (Exception e1){
-                    String[] header = line.split("[\\s:]+");
                     try
                     {
-                        header = line.split("[\\s:]+");
+                        String[] header = line.split("[\\s:,]+");
                         String subject_number_string = header[2];
-                        String target_force_string = header.length==10? header[6]:header[5];
-                        String sample_rate_string = header.length==10? header[9]:header[8];
+                        String target_force_string = header[6];
+                        String allowance_string = header[8];
+                        String sample_rate_string = header[11];
                         subjectNumber = Integer.parseInt(subject_number_string);
                         targetForce = Float.parseFloat(target_force_string);
                         sampleRate = Integer.parseInt(sample_rate_string);
-                        Records r = new HeaderRecords(subjectNumber, targetForce, sampleRate);
+                        allowance = Integer.parseInt(allowance_string);
+                        Records r = new HeaderRecords(subjectNumber, targetForce, sampleRate, allowance);
                         downloadedData.add(r);
                     }
                     catch (Exception e2)
@@ -83,6 +76,7 @@ public class PassiveAnalyzer extends Analyzer {
     {
         myDaysList = new ArrayList<>();
         myRecordsList = new ArrayList<>();
+        adjustmentRecordsList = new ArrayList<>();
         if (downloadedData.size() == 0)
         {
             return;
@@ -102,7 +96,10 @@ public class PassiveAnalyzer extends Analyzer {
                         myDaysList.add(myDays);
                     }
                 }
-                myDays.getRecordsList().add(myRecords);
+                myDays.getRecordsList().add(rec);
+                if ((rec.longTermFlag &= (0b11<<8))  != 0){
+                    adjustmentRecordsList.add(rec);
+                }
             }
             else
             {
@@ -138,12 +135,14 @@ public class PassiveAnalyzer extends Analyzer {
             }
         }
     }
-
-    //use the downloaded data object to generate analyzer class
-    public PassiveAnalyzer(List<Records> downloadedData){
+    public ActiveAnalyzer(List<Records> downloadedData){
         //first line must be Header+year
         myDaysList = new ArrayList<>();
         formAnalyzer(downloadedData);
+    }
+
+    public List<Records> getAdjustmentRecordsList() {
+        return adjustmentRecordsList;
     }
 
 }

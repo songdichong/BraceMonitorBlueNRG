@@ -65,6 +65,7 @@ public abstract class NonHeaderRecords extends Records implements Comparable<Dat
     {
         if (isActive){
             String[] outputArray = new String[]{String.format("%.1f",forceVal),String.format("%.1f",tempVal),
+                    String.valueOf(longTermFlag),
                     String.valueOf(date.getYear()+1900), String.valueOf(date.getMonth()+1),
                     String.valueOf(date.getDate()),String.valueOf(date.getHours()),
                     String.valueOf(date.getMinutes())};
@@ -72,12 +73,15 @@ public abstract class NonHeaderRecords extends Records implements Comparable<Dat
             return output;
         }else {
             String[] outputArray = new String[]{String.format("%.1f",forceVal),String.format("%.1f",tempVal),
-                    String.valueOf(longTermFlag),
                     String.valueOf(date.getYear()+1900), String.valueOf(date.getMonth()+1),
                     String.valueOf(date.getDate()),String.valueOf(date.getHours()),
                     String.valueOf(date.getMinutes())};
             String output = Arrays.toString(outputArray);
             return output;
         }
+    }
+
+    public String getReadableString(){
+        return "Time: "+date.toString()+"\nPressure: "+String.format("%.1f",forceVal)+"\nTemperature: "+String.format("%.1f",tempVal);
     }
 }

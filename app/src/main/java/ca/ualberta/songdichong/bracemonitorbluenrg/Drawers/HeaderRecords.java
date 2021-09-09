@@ -5,7 +5,6 @@ public class HeaderRecords extends Records {
     public int sampleRate;
     public float targetForce;
 
-    public int targetPressure;
     public int allowance;
 
     public HeaderRecords(int subjectNumber, float targetForce, int sampleRate){
@@ -15,10 +14,10 @@ public class HeaderRecords extends Records {
         this.isHeader = true;
     }
 
-    public HeaderRecords(int subjectNumber, int targetPressure, int allowance, int sampleRate){
+    public HeaderRecords(int subjectNumber, float targetPressure, int sampleRate, int allowance){
         this.subjectNumber = subjectNumber;
         this.sampleRate = sampleRate;
-        this.targetPressure = targetPressure;
+        this.targetForce = targetPressure;
         this.allowance = allowance;
         this.isHeader = true;
     }
@@ -27,9 +26,8 @@ public class HeaderRecords extends Records {
     public String getString(boolean isActive)
     {
         if (isActive){
-            return "Subject number: " + subjectNumber + " Target Pressure (mmHg): " + targetPressure +
+            return "Subject number: " + subjectNumber + " Target Pressure (mmHg): " + String.format("%.0f",targetForce) +
                     " Allowance: " + allowance + " Sample rate: " + sampleRate + "\n";
-
         }else {
             return "Subject number: " + subjectNumber + " Target Force (N): " + String.format("%.2f",targetForce) + " Sample rate: " + sampleRate + "\n";
         }

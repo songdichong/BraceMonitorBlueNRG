@@ -8,16 +8,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CalendarView;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.PopupWindow;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -26,11 +27,13 @@ import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
 
+import ca.ualberta.songdichong.bracemonitorbluenrg.AdjustmentHistoryActivity;
 import ca.ualberta.songdichong.bracemonitorbluenrg.AvgForcePlotActivity;
 import ca.ualberta.songdichong.bracemonitorbluenrg.AvgTemperaturePlotActivity;
 import ca.ualberta.songdichong.bracemonitorbluenrg.BluetoothLeService;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Constants;
-import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Days;
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.ActiveAnalyzer;
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Analyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.NonHeaderRecords;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.PassiveAnalyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Records;
@@ -40,9 +43,11 @@ import ca.ualberta.songdichong.bracemonitorbluenrg.R;
 import ca.ualberta.songdichong.bracemonitorbluenrg.TemperaturePlotActivity;
 
 public class ConfigureDrawerFragment extends Fragment {
-    static public PassiveAnalyzer analyzer;
+    static public Analyzer analyzer;
+    static int analyzeMode = 0;
     TextView startDateTime;
     TextView endDateTime;
+    TextView referenceForceValueTitle;
     EditText referenceForceValue;
     EditText referenceTemperatureValue;
     ImageButton configStartDateTime;
@@ -53,7 +58,9 @@ public class ConfigureDrawerFragment extends Fragment {
     Button drawTemperaturePlotButton;
     Button drawForceTemperaturePlotButton;
     Button drawAvgForcePlotButton;
-    Button drawAvgTemperaturePlotBUtton;
+    Button drawAvgTemperaturePlotButton;
+    Button showAdjustDetailButton;
+    Switch analyzerModeSwitch;
     int startYear;
     int startMonth;
     int startDayofMonth;
@@ -66,7 +73,6 @@ public class ConfigureDrawerFragment extends Fragment {
     int endMinuteofHour;
     static double force = 1.00;
     static double temperature = 28.0;
-    BluetoothLeService bluetoothLeService = BluetoothLeService.getmBluetoothLeService();
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -76,6 +82,7 @@ public class ConfigureDrawerFragment extends Fragment {
         configStartDateTime = rootView.findViewById(R.id.config_start_datetime_button);
         configEndDateTime = rootView.findViewById(R.id.config_end_datetime_button);
         referenceForceValue = rootView.findViewById(R.id.reference_force_value);
+        referenceForceValueTitle = rootView.findViewById(R.id.reference_force_value_title);
         referenceTemperatureValue = rootView.findViewById(R.id.reference_temperature_value);
         configReferenceForce = rootView.findViewById(R.id.config_reference_force_value_button);
         configReferenceTemperature = rootView.findViewById(R.id.config_reference_temperature_value_button);
@@ -83,189 +90,281 @@ public class ConfigureDrawerFragment extends Fragment {
         drawTemperaturePlotButton = rootView.findViewById(R.id.draw_temperature_plot_button);
         drawForceTemperaturePlotButton = rootView.findViewById(R.id.draw_force_temperature_plot_button);
         drawAvgForcePlotButton = rootView.findViewById(R.id.draw_avg_force_plot_button);
-        drawAvgTemperaturePlotBUtton = rootView.findViewById(R.id.draw_avg_temperature_plot_button);
+        drawAvgTemperaturePlotButton = rootView.findViewById(R.id.draw_avg_temperature_plot_button);
+        showAdjustDetailButton = rootView.findViewById(R.id.show_adjustment_enabled_button);
+        analyzerModeSwitch = rootView.findViewById(R.id.mode_switch);
+        analyzerModeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    referenceForceValueTitle.setText(R.string.reference_force_active);
+                    drawForcePlotButton.setText(R.string.force_plot_active);
+                    drawForceTemperaturePlotButton.setText(R.string.force_temp_active);
+                    drawAvgForcePlotButton.setText(R.string.force_average_active);
+                    showAdjustDetailButton.setEnabled(true);
+                    if (BluetoothLeService.downloadedData.size() == 0 ){
+                        File file = new File(Environment.getExternalStorageDirectory(), Constants.ACTIVE_FILENAME);
+                        analyzer = new ActiveAnalyzer(file);
+                    }else{
+                        analyzer = new ActiveAnalyzer(BluetoothLeService.downloadedData);
+                    }
+                    setStartEndDateTime();
+                    analyzeMode = 1;
+                    Toast.makeText(getContext(), "Analyze active brace monitor now.", Toast.LENGTH_LONG).show();
+                }
+                else{
+                    referenceForceValueTitle.setText(R.string.reference_force_passive);
+                    drawForcePlotButton.setText(R.string.force_plot_passive);
+                    drawForceTemperaturePlotButton.setText(R.string.force_temp_passive);
+                    drawAvgForcePlotButton.setText(R.string.force_average_passive);
+                    showAdjustDetailButton.setEnabled(false);
+                    if (BluetoothLeService.downloadedData.size() == 0 ){
+                        File file = new File(Environment.getExternalStorageDirectory(), Constants.FILENAME);
+                        analyzer = new PassiveAnalyzer(file);
+                    }else{
+                        analyzer = new PassiveAnalyzer(BluetoothLeService.downloadedData);
+                    }
+                    setStartEndDateTime();
+                    analyzeMode = 0;
+                    Toast.makeText(getContext(), "Analyze passive brace monitor now.", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
 
-        if (BluetoothLeService.downloadedData.size() == 0 ){
-            Log.v("123","0");
-            File file = new File(Environment.getExternalStorageDirectory(), Constants.FILENAME);
-            analyzer = new PassiveAnalyzer(file);
-        }else{
-            analyzer = new PassiveAnalyzer(BluetoothLeService.downloadedData);
+        configReferenceForce.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String forceString = referenceForceValue.getText().toString();
+                if (!forceString.equals("")){
+                    force = Double.parseDouble(forceString);
+                }
+                else{
+                    force = analyzer.getTargetForce() == 0 ? 1.00 : analyzer.getTargetForce();
+                }
+                referenceForceValue.setText(String.format("%.2f",force));
+            }
+        });
+
+        configReferenceTemperature.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String temperatureString = referenceTemperatureValue.getText().toString();
+                if (!temperatureString.equals("")){
+                    temperature = Double.valueOf(temperatureString);
+                }
+                else{
+                    temperature = 28.0;
+                }
+                referenceTemperatureValue.setText(String.format("%.1f",temperature));
+            }
+        });
+
+        drawForcePlotButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), ForcePlotActivity.class);
+                intent.putExtra("force", force);
+                int[] startTime = new int[10];
+                startTime[0] = startYear;
+                startTime[1] = startMonth;
+                startTime[2] = startDayofMonth;
+                startTime[3] = startHourofDay;
+                startTime[4] = startMinuteofHour;
+                startTime[5] = endYear;
+                startTime[6] = endMonth;
+                startTime[7] = endDayofMonth;
+                startTime[8] = endHourofDay;
+                startTime[9] = endMinuteofHour;
+                Date start = new Date(startYear,startMonth,startDayofMonth,startHourofDay,startMinuteofHour);
+                Date end = new Date(endYear,endMonth,endDayofMonth,endHourofDay,endMinuteofHour);
+                if (start.compareTo(end) >= 0){
+                    Toast.makeText(getContext(), "Date selection is invalid.", Toast.LENGTH_LONG).show();
+                }else{
+                    intent.putExtra("startEndIndex",startTime);
+                    startActivity(intent);
+                }
+            }
+        });
+
+        drawTemperaturePlotButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), TemperaturePlotActivity.class);
+                intent.putExtra("temperature", temperature);
+                int[] startTime = new int[10];
+                startTime[0] = startYear;
+                startTime[1] = startMonth;
+                startTime[2] = startDayofMonth;
+                startTime[3] = startHourofDay;
+                startTime[4] = startMinuteofHour;
+                startTime[5] = endYear;
+                startTime[6] = endMonth;
+                startTime[7] = endDayofMonth;
+                startTime[8] = endHourofDay;
+                startTime[9] = endMinuteofHour;
+                Date start = new Date(startYear,startMonth,startDayofMonth,startHourofDay,startMinuteofHour);
+                Date end = new Date(endYear,endMonth,endDayofMonth,endHourofDay,endMinuteofHour);
+                if (start.compareTo(end) >= 0){
+                    Toast.makeText(getContext(), "Date selection is invalid", Toast.LENGTH_LONG).show();
+                }else{
+                    intent.putExtra("startEndIndex",startTime);
+                    startActivity(intent);
+                }
+            }
+        });
+
+        drawForceTemperaturePlotButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), ForceTemperaturePlotActivity.class);
+                intent.putExtra("temperature", temperature);
+                intent.putExtra("force", force);
+                int[] startTime = new int[10];
+                startTime[0] = startYear;
+                startTime[1] = startMonth;
+                startTime[2] = startDayofMonth;
+                startTime[3] = startHourofDay;
+                startTime[4] = startMinuteofHour;
+                startTime[5] = endYear;
+                startTime[6] = endMonth;
+                startTime[7] = endDayofMonth;
+                startTime[8] = endHourofDay;
+                startTime[9] = endMinuteofHour;
+                Date start = new Date(startYear,startMonth,startDayofMonth,startHourofDay,startMinuteofHour);
+                Date end = new Date(endYear,endMonth,endDayofMonth,endHourofDay,endMinuteofHour);
+                if (start.compareTo(end) >= 0){
+                    Toast.makeText(getContext(), "Date selection is invalid", Toast.LENGTH_LONG).show();
+                }else{
+                    intent.putExtra("startEndIndex",startTime);
+                    startActivity(intent);
+                }
+            }
+        });
+
+
+        drawAvgForcePlotButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), AvgForcePlotActivity.class);
+                int[] startTime = new int[10];
+                startTime[0] = startYear;
+                startTime[1] = startMonth;
+                startTime[2] = startDayofMonth;
+                startTime[3] = startHourofDay;
+                startTime[4] = startMinuteofHour;
+                startTime[5] = endYear;
+                startTime[6] = endMonth;
+                startTime[7] = endDayofMonth;
+                startTime[8] = endHourofDay;
+                startTime[9] = endMinuteofHour;
+                Date start = new Date(startYear,startMonth,startDayofMonth,startHourofDay,startMinuteofHour);
+                Date end = new Date(endYear,endMonth,endDayofMonth,endHourofDay,endMinuteofHour);
+                if (start.compareTo(end) >= 0){
+                    Toast.makeText(getContext(), "Date selection is invalid", Toast.LENGTH_LONG).show();
+                }else{
+                    intent.putExtra("startEndIndex",startTime);
+                    startActivity(intent);
+                }
+            }
+        });
+
+        drawAvgTemperaturePlotButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), AvgTemperaturePlotActivity.class);
+                int[] startTime = new int[10];
+                startTime[0] = startYear;
+                startTime[1] = startMonth;
+                startTime[2] = startDayofMonth;
+                startTime[3] = startHourofDay;
+                startTime[4] = startMinuteofHour;
+                startTime[5] = endYear;
+                startTime[6] = endMonth;
+                startTime[7] = endDayofMonth;
+                startTime[8] = endHourofDay;
+                startTime[9] = endMinuteofHour;
+                Date start = new Date(startYear,startMonth,startDayofMonth,startHourofDay,startMinuteofHour);
+                Date end = new Date(endYear,endMonth,endDayofMonth,endHourofDay,endMinuteofHour);
+                if (start.compareTo(end) >= 0){
+                    Toast.makeText(getContext(), "Date selection is invalid", Toast.LENGTH_LONG).show();
+                }else{
+                    intent.putExtra("startEndIndex",startTime);
+                    startActivity(intent);
+                }
+            }
+        });
+        showAdjustDetailButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (analyzeMode == 1){
+                    Intent intent = new Intent(getActivity(), AdjustmentHistoryActivity.class);
+                    int[] startTime = new int[10];
+                    startTime[0] = startYear;
+                    startTime[1] = startMonth;
+                    startTime[2] = startDayofMonth;
+                    startTime[3] = startHourofDay;
+                    startTime[4] = startMinuteofHour;
+                    startTime[5] = endYear;
+                    startTime[6] = endMonth;
+                    startTime[7] = endDayofMonth;
+                    startTime[8] = endHourofDay;
+                    startTime[9] = endMinuteofHour;
+                    Date start = new Date(startYear,startMonth,startDayofMonth,startHourofDay,startMinuteofHour);
+                    Date end = new Date(endYear,endMonth,endDayofMonth,endHourofDay,endMinuteofHour);
+                    if (start.compareTo(end) >= 0){
+                        Toast.makeText(getContext(), "Date selection is invalid", Toast.LENGTH_LONG).show();
+                    }else{
+                        intent.putExtra("startEndIndex",startTime);
+                        startActivity(intent);
+                    }
+                }
+            }
+        });
+        return rootView;
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        analyzerModeSwitch.setChecked(analyzeMode == 1);
+        if (analyzer == null){
+            if (analyzeMode == 0) {
+                if (BluetoothLeService.downloadedData.size() == 0 ){
+                    File file = new File(Environment.getExternalStorageDirectory(), Constants.FILENAME);
+                    analyzer = new PassiveAnalyzer(file);
+                }else{
+                    analyzer = new PassiveAnalyzer(BluetoothLeService.downloadedData);
+                }
+                referenceForceValueTitle.setText(R.string.reference_force_active);
+                drawForcePlotButton.setText(R.string.force_plot_active);
+                drawForceTemperaturePlotButton.setText(R.string.force_temp_active);
+                drawAvgForcePlotButton.setText(R.string.force_average_active);
+                showAdjustDetailButton.setEnabled(true);
+            } else if (analyzeMode == 1)  {
+                if (BluetoothLeService.downloadedData.size() == 0 ){
+                    File file = new File(Environment.getExternalStorageDirectory(), Constants.ACTIVE_FILENAME);
+                    analyzer = new ActiveAnalyzer(file);
+                }else{
+                    analyzer = new ActiveAnalyzer(BluetoothLeService.downloadedData);
+                }
+                referenceForceValueTitle.setText(R.string.reference_force_passive);
+                drawForcePlotButton.setText(R.string.force_plot_passive);
+                drawForceTemperaturePlotButton.setText(R.string.force_temp_passive);
+                drawAvgForcePlotButton.setText(R.string.force_average_passive);
+                showAdjustDetailButton.setEnabled(false);
+            }
         }
+
+        referenceForceValue.setText(String.format("%.2f", analyzer.getTargetForce() == 0 ? 1.00 : analyzer.getTargetForce()));
+
 
         if (analyzer.getMyDaysList().size() == 0){
             Toast.makeText(getContext(), "No data is saved", Toast.LENGTH_LONG).show();
         }
         else{
             setStartEndDateTime();
-            referenceForceValue.setText(String.format("%.2f", analyzer.getTargetForce() == 0 ? 1.00 : analyzer.getTargetForce()));
-            configReferenceForce.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    String forceString = referenceForceValue.getText().toString();
-                    if (!forceString.equals("")){
-                        force = Double.parseDouble(forceString);
-                    }
-                    else{
-                        force = analyzer.getTargetForce() == 0 ? 1.00 : analyzer.getTargetForce();
-                    }
-                    referenceForceValue.setText(String.format("%.2f",force));
-                }
-            });
-
-            configReferenceTemperature.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    String temperatureString = referenceTemperatureValue.getText().toString();
-                    if (!temperatureString.equals("")){
-                        temperature = Double.valueOf(temperatureString);
-                    }
-                    else{
-                        temperature = 28.0;
-                    }
-                    referenceTemperatureValue.setText(String.format("%.1f",temperature));
-                }
-            });
-            if (bluetoothLeService.getDeviceInfoVal() == Constants.activeBraceMonitor){
-                return rootView;
-            }
-            drawForcePlotButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(getActivity(), ForcePlotActivity.class);
-                    intent.putExtra("force", force);
-                    int[] startTime = new int[10];
-                    startTime[0] = startYear;
-                    startTime[1] = startMonth;
-                    startTime[2] = startDayofMonth;
-                    startTime[3] = startHourofDay;
-                    startTime[4] = startMinuteofHour;
-                    startTime[5] = endYear;
-                    startTime[6] = endMonth;
-                    startTime[7] = endDayofMonth;
-                    startTime[8] = endHourofDay;
-                    startTime[9] = endMinuteofHour;
-                    Date start = new Date(startYear,startMonth,startDayofMonth,startHourofDay,startMinuteofHour);
-                    Date end = new Date(endYear,endMonth,endDayofMonth,endHourofDay,endMinuteofHour);
-                    if (start.compareTo(end) >= 0){
-                        Toast.makeText(getContext(), "Date selection is invalid.", Toast.LENGTH_LONG).show();
-                    }else{
-                        intent.putExtra("startEndIndex",startTime);
-                        startActivity(intent);
-                    }
-                }
-            });
-
-            drawTemperaturePlotButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(getActivity(), TemperaturePlotActivity.class);
-                    intent.putExtra("temperature", temperature);
-                    int[] startTime = new int[10];
-                    startTime[0] = startYear;
-                    startTime[1] = startMonth;
-                    startTime[2] = startDayofMonth;
-                    startTime[3] = startHourofDay;
-                    startTime[4] = startMinuteofHour;
-                    startTime[5] = endYear;
-                    startTime[6] = endMonth;
-                    startTime[7] = endDayofMonth;
-                    startTime[8] = endHourofDay;
-                    startTime[9] = endMinuteofHour;
-                    Date start = new Date(startYear,startMonth,startDayofMonth,startHourofDay,startMinuteofHour);
-                    Date end = new Date(endYear,endMonth,endDayofMonth,endHourofDay,endMinuteofHour);
-                    if (start.compareTo(end) >= 0){
-                        Toast.makeText(getContext(), "Date selection is invalid", Toast.LENGTH_LONG).show();
-                    }else{
-                        intent.putExtra("startEndIndex",startTime);
-                        startActivity(intent);
-                    }
-                }
-            });
-
-            drawForceTemperaturePlotButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(getActivity(), ForceTemperaturePlotActivity.class);
-                    intent.putExtra("temperature", temperature);
-                    intent.putExtra("force", force);
-                    int[] startTime = new int[10];
-                    startTime[0] = startYear;
-                    startTime[1] = startMonth;
-                    startTime[2] = startDayofMonth;
-                    startTime[3] = startHourofDay;
-                    startTime[4] = startMinuteofHour;
-                    startTime[5] = endYear;
-                    startTime[6] = endMonth;
-                    startTime[7] = endDayofMonth;
-                    startTime[8] = endHourofDay;
-                    startTime[9] = endMinuteofHour;
-                    Date start = new Date(startYear,startMonth,startDayofMonth,startHourofDay,startMinuteofHour);
-                    Date end = new Date(endYear,endMonth,endDayofMonth,endHourofDay,endMinuteofHour);
-                    if (start.compareTo(end) >= 0){
-                        Toast.makeText(getContext(), "Date selection is invalid", Toast.LENGTH_LONG).show();
-                    }else{
-                        intent.putExtra("startEndIndex",startTime);
-                        startActivity(intent);
-                    }
-                }
-            });
-
-
-            drawAvgForcePlotButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(getActivity(), AvgForcePlotActivity.class);
-                    int[] startTime = new int[10];
-                    startTime[0] = startYear;
-                    startTime[1] = startMonth;
-                    startTime[2] = startDayofMonth;
-                    startTime[3] = startHourofDay;
-                    startTime[4] = startMinuteofHour;
-                    startTime[5] = endYear;
-                    startTime[6] = endMonth;
-                    startTime[7] = endDayofMonth;
-                    startTime[8] = endHourofDay;
-                    startTime[9] = endMinuteofHour;
-                    Date start = new Date(startYear,startMonth,startDayofMonth,startHourofDay,startMinuteofHour);
-                    Date end = new Date(endYear,endMonth,endDayofMonth,endHourofDay,endMinuteofHour);
-                    if (start.compareTo(end) >= 0){
-                        Toast.makeText(getContext(), "Date selection is invalid", Toast.LENGTH_LONG).show();
-                    }else{
-                        intent.putExtra("startEndIndex",startTime);
-                        startActivity(intent);
-                    }
-                }
-            });
-
-            drawAvgTemperaturePlotBUtton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(getActivity(), AvgTemperaturePlotActivity.class);
-                    int[] startTime = new int[10];
-                    startTime[0] = startYear;
-                    startTime[1] = startMonth;
-                    startTime[2] = startDayofMonth;
-                    startTime[3] = startHourofDay;
-                    startTime[4] = startMinuteofHour;
-                    startTime[5] = endYear;
-                    startTime[6] = endMonth;
-                    startTime[7] = endDayofMonth;
-                    startTime[8] = endHourofDay;
-                    startTime[9] = endMinuteofHour;
-                    Date start = new Date(startYear,startMonth,startDayofMonth,startHourofDay,startMinuteofHour);
-                    Date end = new Date(endYear,endMonth,endDayofMonth,endHourofDay,endMinuteofHour);
-                    if (start.compareTo(end) >= 0){
-                        Toast.makeText(getContext(), "Date selection is invalid", Toast.LENGTH_LONG).show();
-                    }else{
-                        intent.putExtra("startEndIndex",startTime);
-                        startActivity(intent);
-                    }
-                }
-            });
         }
-        return rootView;
-
     }
 
 
@@ -334,21 +433,39 @@ public class ConfigureDrawerFragment extends Fragment {
         cal.set(endYear,endMonth-1,endDayofMonth);
         final long endDateLong = cal.getTime().getTime();
 
-        startDateTime.setText(String.valueOf(startYear) + "-" + getTimeString(startMonth) + "-" +getTimeString(startDayofMonth) + " " + getTimeString(startHourofDay)+":"+getTimeString(startMinuteofHour));
-        endDateTime.setText(String.valueOf(endYear) + "-" + getTimeString(endMonth) + "-" +getTimeString(endDayofMonth) + " " + getTimeString(endHourofDay)+":"+getTimeString(endMinuteofHour));
+        if (startRecord == null && endRecord == null){
+            startDateTime.setText("");
+            endDateTime.setText("");
+            configStartDateTime.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    return;
+                }
+            });
+            configEndDateTime.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    return;
+                }
+            });
+        }else{
+            startDateTime.setText(String.valueOf(startYear) + "-" + getTimeString(startMonth) + "-" +getTimeString(startDayofMonth) + " " + getTimeString(startHourofDay)+":"+getTimeString(startMinuteofHour));
+            endDateTime.setText(String.valueOf(endYear) + "-" + getTimeString(endMonth) + "-" +getTimeString(endDayofMonth) + " " + getTimeString(endHourofDay)+":"+getTimeString(endMinuteofHour));
 
-        configStartDateTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showCalendarPopup(startDateLong,endDateLong,true);
-            }
-        });
-        configEndDateTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showCalendarPopup(startDateLong,endDateLong,false);
-            }
-        });
+            configStartDateTime.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    showCalendarPopup(startDateLong,endDateLong,true);
+                }
+            });
+            configEndDateTime.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    showCalendarPopup(startDateLong,endDateLong,false);
+                }
+            });
+        }
+
     }
 
     public void showCalendarPopup(long startDateLong, long endDateLong,final boolean isStart) {
@@ -428,5 +545,11 @@ public class ConfigureDrawerFragment extends Fragment {
                     }, endHourofDay, endMinuteofHour, true);
             tpd.show();
         }
+    }
+    public static int getAnalyzeMode() {
+        return analyzeMode;
+    }
+    public static void setAnalyzeMode(int mode) {
+        analyzeMode = mode;
     }
 }

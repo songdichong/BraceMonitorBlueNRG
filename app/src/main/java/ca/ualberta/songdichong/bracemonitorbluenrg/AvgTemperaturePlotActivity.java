@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Analyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.NonHeaderRecords;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.PassiveAnalyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Records;
@@ -77,7 +78,7 @@ public class AvgTemperaturePlotActivity extends Activity {
 
         renderer.setYLabelsAlign(Paint.Align.RIGHT);
         renderer.setXTitle("Time of Day(HH)");
-        renderer.setYTitle("Average Force(N)");
+        renderer.setYTitle("Average Temperature(°C)");
         renderer.setShowGrid(true);
         renderer.setGridColor(Color.GRAY);
         renderer.setXLabels(0); // sets the number of integer labels to appear
@@ -102,7 +103,7 @@ public class AvgTemperaturePlotActivity extends Activity {
     }
 
     private void calLinePlotData(){
-        PassiveAnalyzer analyzer = ConfigureDrawerFragment.analyzer;
+        Analyzer analyzer = ConfigureDrawerFragment.analyzer;
         int[] startEndIndex = getIntent().getIntArrayExtra("startEndIndex");
 
         Date startDate = new Date (startEndIndex[0] -1900 ,startEndIndex[1] - 1,startEndIndex[2],startEndIndex[3],startEndIndex[4]);

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BM-Single v2.2</string>
+    <string name="app_name">BM-Single v2.3</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Brace Monitor</string>
@@ -13,4 +13,16 @@
     <string name="title_section4">Advanced</string>
     <string name="title_section5">Terminate Link</string>
     <string name="title_section6">Analyze</string>
+
+    <string name="reference_force_passive">Reference Force Value (N)</string>
+    <string name="reference_force_active">Reference Pressure Value (mmHg)</string>
+
+    <string name="force_plot_passive">Force Compliance</string>
+    <string name="force_plot_active">Pressure Compliance</string>
+
+    <string name="force_temp_passive">Force and Temperature Compliance</string>
+    <string name="force_temp_active">Pressure and Temperature Compliance</string>
+
+    <string name="force_average_passive">Daily Force Average</string>
+    <string name="force_average_active">Daily Pressure Average</string>
 </resources>

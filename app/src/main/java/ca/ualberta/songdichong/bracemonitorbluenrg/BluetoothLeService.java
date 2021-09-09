@@ -113,6 +113,8 @@ import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.HeaderRecords;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.NonHeaderRecords;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.PassiveRecords;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Records;
+import ca.ualberta.songdichong.bracemonitorbluenrg.Fragments.ConfigureDrawerFragment;
+
 import static ca.ualberta.songdichong.bracemonitorbluenrg.Constants.*;
 
 public class BluetoothLeService {
@@ -402,6 +404,9 @@ public class BluetoothLeService {
                                     }
                                 }
                                 deviceInfoVal = characteristic.getValue()[0];
+                                if (deviceInfoVal == activeBraceMonitor){
+                                    ConfigureDrawerFragment.setAnalyzeMode(1);
+                                }
                             }
                         }
 
@@ -1188,7 +1193,7 @@ public class BluetoothLeService {
                 int subject_number =  subject_number_msd + subject_number_lsd;
                 int targetPressure =  arrays[index+10] >= 0 ? arrays[index+10]:arrays[index+10]+256;
                 int allowance =  arrays[index+11] >= 0 ? arrays[index+11]:arrays[index+11]+256;
-                Records records = new HeaderRecords(subject_number, targetPressure, allowance, sampleRate);
+                Records records = new HeaderRecords(subject_number, targetPressure, sampleRate, allowance);
 
                 downloadedData.add(records);
                 index += 12;

@@ -149,24 +149,6 @@ public class CalibrationFragment  extends Fragment {
                 if (mBluetoothLeService.getDeviceInfoVal() == Constants.activeBraceMonitor) {
                     currentForceMeasurement = intent.getDoubleExtra(Constants.ACTION_FORCE_UPDATE,0);
                 }
-                else {
-                    double forceValue = intent.getDoubleExtra(Constants.ACTION_FORCE_UPDATE,0);
-                    double[] forceCalibration = mBluetoothLeService.getForceCalibration();
-                    double forceMeasurement;
-                    if (forceValue <= forceCalibration[1]) {
-                        forceMeasurement = (forceValue-forceCalibration[0]) / (forceCalibration[1] - forceCalibration[0]) ;
-                    }
-                    else if (forceValue <= forceCalibration[2]) {
-                        forceMeasurement = (forceValue-forceCalibration[1]) / (forceCalibration[2] - forceCalibration[1]) + 1;
-                    }
-                    else if (forceValue < forceCalibration[3]) {
-                        forceMeasurement = (forceValue-forceCalibration[2]) / (forceCalibration[3] - forceCalibration[2]) * 4 + 2;
-                    }
-                    else{
-                        forceMeasurement = (forceValue-forceCalibration[3]) / (forceCalibration[3] - forceCalibration[2]) * 4 + 6;
-                    }
-                    if (forceMeasurement<0) forceMeasurement = 0;
-                }
             }
 
             else if (Constants.ACTION_GATT_DISCONNECTED.equals(action)) {
@@ -178,8 +160,13 @@ public class CalibrationFragment  extends Fragment {
     };
     private void showFormulaText(){
         StringBuilder text = new StringBuilder("P = ");
-        text.append(String.format("%.2f",slope)  + " * V + ");
-        text.append(String.format("%.2f",intercept) + "\n");
+        text.append(String.format("%.2f",slope)  + " * V ");
+        if (intercept >= 0){
+            text.append("+ ");
+        } else {
+            text.append("- ");
+        }
+        text.append(String.format("%.2f",Math.abs(intercept)) + "\n");
         text.append("R²: "+String.format("%.4f",r2));
         calibrationFormulaTextView.setText(text);
     }

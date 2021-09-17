@@ -4,7 +4,7 @@ import android.util.Log;
 
 import java.util.*;
 
-public class PassiveRecords extends NonHeaderRecords {
+public class    PassiveRecords extends NonHeaderRecords {
     public PassiveRecords(int year, int month, int date, int hour, int minute, float force, float temperature){
         try{
             this.date = new Date(year-1900,month-1,date,hour,minute);

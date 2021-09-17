@@ -8,7 +8,7 @@ terms of the license agreement you entered into at the UofA.
 
 No part of the project, including this file, may be copied, propagated, or
 distributed except with the explicit written permission of Dr. Edmond Lou
-(elou@ualberta.ca), Director of CETT.
+(elou@ualberta.ca).
 
 Project Name       : Brace Monitor Android User Interface
 
@@ -611,6 +611,7 @@ public class BluetoothLeService {
                     else if (characteristic.getUuid().equals(UUID_TEMP_VALUE)){
                         if (deviceInfoVal == activeBraceMonitor){
                             double temperature = convertADC(characteristic.getValue(), temperatureSensor);
+
                             temperature = temperature + (tempCaliRealVal-tempCaliADCVal);
                             broadcastUpdate(ACTION_TEMP_UPDATE,temperature);
                         }else{
@@ -620,6 +621,8 @@ public class BluetoothLeService {
                             broadcastUpdate(ACTION_TEMPRAW_UPDATE,tempADCVoltage);
                         }
                     }
+
+
                     else if (characteristic.getUuid().equals(UUID_EXTERNAL_TEST_VALUE)) {
                         Log.v("EXTERNAL_TEST",Arrays.toString(characteristic.getValue()));
                         broadcastUpdate(ACTION_EXTERNAL_TEST, characteristic.getValue());

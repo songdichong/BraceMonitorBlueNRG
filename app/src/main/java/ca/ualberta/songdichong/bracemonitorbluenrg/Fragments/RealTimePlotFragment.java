@@ -47,6 +47,7 @@ import com.androidplot.xy.XYStepMode;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -466,7 +467,8 @@ public class RealTimePlotFragment extends Fragment {
         }
         @Override
         public String toString(){
-            return currentTime.toString() + " " + String.format("%.2f",force);
+            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy,HH:mm:ss");
+            return format.format(currentTime)+","+String.format("%.2f",force);
         }
     }
 
@@ -529,7 +531,7 @@ public class RealTimePlotFragment extends Fragment {
         popupWindow.setAnimationStyle(R.style.Animation);
         Button button = layout.findViewById(R.id.confirm);
         Button cancelButton =  layout.findViewById(R.id.cancel);
-        final String currentTime = (String) DateFormat.format("yyyy-MM-dd hh:mm", new Date());
+        final String currentTime = (String) DateFormat.format("yyyy-MM-dd HH:mm", new Date());
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -576,7 +578,7 @@ public class RealTimePlotFragment extends Fragment {
         try {
             FileOutputStream out = new FileOutputStream(file);
             out.write(("Brace Monitor Real Time Data: "+Calendar.getInstance().getTime().toString()+"\n").getBytes());
-            out.write(("Time, Force(N)\n").getBytes());
+            out.write(("Date, Time, Force(N)\n").getBytes());
             out.write('\n');
             for (int i = 0; i < realTimeDataList.size(); i++) {
                 RealTimeData realTimeData = realTimeDataList.get(i);

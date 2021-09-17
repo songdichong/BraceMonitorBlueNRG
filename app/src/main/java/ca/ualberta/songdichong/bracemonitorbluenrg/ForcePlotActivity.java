@@ -133,7 +133,6 @@ public class ForcePlotActivity extends Activity  {
         overRenderer.setChartValuesTextSize(60);
         overRenderer.setChartValuesTextAlign(Paint.Align.RIGHT);
 
-
         renderer.addSeriesRenderer(notWornRenderer);
         renderer.addSeriesRenderer(belowRenderer);
         renderer.addSeriesRenderer(withinRenderer);

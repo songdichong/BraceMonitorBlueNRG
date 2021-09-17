@@ -71,11 +71,8 @@ public class AvgForcePlotActivity extends Activity  {
             renderer.setChartTitle("Daily Average Force Values");
             renderer.setYTitle("Average Force(N)");
         }
-
         renderer.setXAxisMin(startTime.getTime());
-        Log.v("start",String.valueOf(startTime.getTime()));
         renderer.setXAxisMax(endTime.getTime());
-        Log.v("end",String.valueOf(endTime.getTime()));
         renderer.setYAxisMin(0);
         renderer.setYAxisMax(max+0.5);
         for (int i = 0;i<=24*60*60*1000;i+=240*60*1000){
@@ -89,7 +86,6 @@ public class AvgForcePlotActivity extends Activity  {
 
         renderer.setYLabelsAlign(Paint.Align.RIGHT);
         renderer.setXTitle("Time of Day(HH)");
-
         renderer.setShowGrid(true);
         renderer.setGridColor(Color.GRAY);
         renderer.setXLabels(0); // sets the number of integer labels to appear

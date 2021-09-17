@@ -61,7 +61,7 @@ public class ConfigureSensorFragment extends PreferenceFragment{
     TextView deviceName;
     TextView versionText;
     TextView memoryText;
-        BluetoothLeService mBluetoothLeService;
+    BluetoothLeService mBluetoothLeService;
     int[] sleepWakeTimeArray = new int[4];
     /*1. Assign buttons(preference) using findPreference function.
      2. Assign onPreferenceClickListener for the buttons(preference)*/

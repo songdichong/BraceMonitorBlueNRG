@@ -62,9 +62,7 @@ public class AvgTemperaturePlotActivity extends Activity {
     public void myChartSettings(XYMultipleSeriesRenderer renderer) {
         renderer.setChartTitle("Daily Average Temperature Values");
         renderer.setXAxisMin(startTime.getTime());
-        Log.v("start",String.valueOf(startTime.getTime()));
         renderer.setXAxisMax(endTime.getTime());
-        Log.v("end",String.valueOf(endTime.getTime()));
         renderer.setYAxisMin(0);
         renderer.setYAxisMax(max+0.5);
         for (int i = 0;i<=24*60*60*1000;i+=240*60*1000){

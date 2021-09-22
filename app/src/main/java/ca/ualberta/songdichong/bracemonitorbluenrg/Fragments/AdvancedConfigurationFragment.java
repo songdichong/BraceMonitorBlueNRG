@@ -32,10 +32,45 @@ import ca.ualberta.songdichong.bracemonitorbluenrg.BluetoothLeService;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Constants;
 import ca.ualberta.songdichong.bracemonitorbluenrg.MainActivity;
 import ca.ualberta.songdichong.bracemonitorbluenrg.R;
+/*
+Copyright © 2020, University of Alberta. All Rights Reserved.
 
+This software is the confidential and proprietary information
+of the Department of Electrical and Computer Engineering at the University of Alberta (UofA).
+You shall not disclose such Confidential Information and shall use it only in accordance with the
+terms of the license agreement you entered into at the UofA.
 
-@SuppressWarnings("deprecation")
-public class    AdvancedConfigurationFragment extends PreferenceFragment {
+No part of the project, including this file, may be copied, propagated, or
+distributed except with the explicit written permission of Dr. Edmond Lou
+(elou@ualberta.ca).
+
+Project Name       : Brace Monitor Android User Interface - Single
+
+File Name          : AdvancedConfigurationFragment.java
+
+Original Author    : Dichong Song
+
+File Last Modification Date : 2021/09/16
+
+File Description: This file creates a view for the advanced configuration of a brace monitor.
+
+Project Structure:
+ MainActivity : main activity of the project, all fragments are commit up on it
+
+             ----> HomeFragment (default): scan and connect with brace monitor devices
+             ----> ConfigureDrawerFragment: configure analyze tools for the downloaded data from a brace monitor
+                        ----> Other PlotActivities are started here
+   navigator ----> ConfigureSensorFragment: configure settings of a brace monitor
+             ----> GraphConfigurationFragment: change number of graph displaced in RealTimePlotFragment
+             ----> OutputDataFragment: download long-term data from a brace monitor and export it
+             ----> RealTimePlotFragment: plot the real-time force/pressure figure for all connected brace monitors
+             ----> AdvancedConfigurationFragment: configure advanced settings of a brace monitor
+             ----> CalibrationFragment: calibrate an active brace monitor (monitor only)
+
+ singleton object:  1.  mBluetoothLeService, handle all the communications of all connected device
+                    2.  analyzer, handle the analysis tools using Android device
+ */
+public class  AdvancedConfigurationFragment extends PreferenceFragment {
     TextView forceText = null;
     TextView forceVoltage = null;
     TextView temperatureText = null;
@@ -60,6 +95,14 @@ public class    AdvancedConfigurationFragment extends PreferenceFragment {
         }
     }
 
+    /*
+    * Function Name:    initializeActiveBraceMonitorAdvancedPage
+    * Function Input:   None
+    * Function Output:  None
+    *
+    * Function Detail:  Initialize the page for the active brace monitor.
+    *                   Buttons under the pressure calibrations area are different from the passives.
+    * */
     private void initializeActiveBraceMonitorAdvancedPage(){
         addPreferencesFromResource(R.xml.advanced_preferences_active);
         Preference setDeviceID = findPreference("set_device_identifier");
@@ -212,7 +255,14 @@ public class    AdvancedConfigurationFragment extends PreferenceFragment {
             }
         });
     }
-
+    /*
+     * Function Name:    initializePassiveBraceMonitorAdvancedPage
+     * Function Input:   None
+     * Function Output:  None
+     *
+     * Function Detail:  Initialize the page for the passive brace monitor.
+     *                   Buttons under the pressure calibrations area are different from the actives.
+     * */
     private void initializePassiveBraceMonitorAdvancedPage(){
         addPreferencesFromResource(R.xml.advanced_preferences_passive);
         Preference setDeviceID = findPreference("set_device_identifier");
@@ -364,6 +414,7 @@ public class    AdvancedConfigurationFragment extends PreferenceFragment {
         deviceName.setText(BluetoothLeService.deviceName);
         return v;
     }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -383,56 +434,75 @@ public class    AdvancedConfigurationFragment extends PreferenceFragment {
         getActivity().getApplicationContext().unregisterReceiver(updateReceiver);
     }
 
-
+    /*
+     * Function Name:    showNumberPicker
+     * Function Input:   int max, max value of number picker
+     *                   int min, min value of number picker
+     *                   int type, 0: window for setting device ID, range [0,999]
+     *                             1: window for setting current temperature calibration, range [30,10]
+     * Function Output:  None
+     *
+     * Function Detail:  Initialize the page for the passive brace monitor.
+     *                   Buttons under the pressure calibrations area are different from the actives.
+     * */
     private void showNumberPicker(int max, int min, int type) {
-            LayoutInflater layoutInflater = (LayoutInflater) getActivity()
-                    .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-            View layout = layoutInflater.inflate(R.layout.number_picker_dialog, null, false);
-            final PopupWindow popupWindow = new PopupWindow(layout,
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, true);
-            popupWindow.setContentView(layout);
-            popupWindow.setAnimationStyle(R.style.Animation);
-            final NumberPicker numberPicker = (NumberPicker) layout.findViewById(R.id.numberPicker);
-            numberPicker.setMaxValue(max);
-            numberPicker.setMinValue(min);
-            Button button = (Button) layout.findViewById(R.id.confirm);
-            if (type == 0)
-            {
-                button.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mBluetoothLeService.setDeviceID(numberPicker.getValue());
-                        popupWindow.dismiss();
-                    }
-                });
-            }
-            else if (type == 1)
-            {
-                numberPicker.setValue(23);
-                button.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mBluetoothLeService.setTempCalibration(numberPicker.getValue());
-                        popupWindow.dismiss();
-                    }
-                });
-            }
-
-            Button cancelButton = (Button) layout.findViewById(R.id.button_cancel);
-            cancelButton.setOnClickListener(new View.OnClickListener() {
+        LayoutInflater layoutInflater = (LayoutInflater) getActivity()
+                .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+        View layout = layoutInflater.inflate(R.layout.number_picker_dialog, null, false);
+        final PopupWindow popupWindow = new PopupWindow(layout,
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, true);
+        popupWindow.setContentView(layout);
+        popupWindow.setAnimationStyle(R.style.Animation);
+        final NumberPicker numberPicker = (NumberPicker) layout.findViewById(R.id.numberPicker);
+        numberPicker.setMaxValue(max);
+        numberPicker.setMinValue(min);
+        Button button = (Button) layout.findViewById(R.id.confirm);
+        if (type == 0)
+        {
+            button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    mBluetoothLeService.setDeviceID(numberPicker.getValue());
                     popupWindow.dismiss();
                 }
             });
-            popupWindow.showAtLocation(layout, Gravity.TOP, 0, 0);
         }
+        else if (type == 1)
+        {
+            numberPicker.setValue(23);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mBluetoothLeService.setTempCalibration(numberPicker.getValue());
+                    popupWindow.dismiss();
+                }
+            });
+        }
+
+        Button cancelButton = (Button) layout.findViewById(R.id.button_cancel);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });
+        popupWindow.showAtLocation(layout, Gravity.TOP, 0, 0);
+    }
 
     public int convertCaliVoltageToADC(double caliVal){
         int resultADCVal = (int)(((caliVal / 3) - 0.6) / 2.4 * 41260);
         return resultADCVal;
     }
 
+    /*
+     * Function Name:    showThresholdInputDialog
+     * Function Input:   int type, 0: window for setting device ID, range [0,999]
+     *                             1: window for setting current temperature calibration, range [30,10]
+     * Function Output:  None
+     *
+     * Function Detail:  Initialize the page for the passive brace monitor.
+     *                   Buttons under the pressure calibrations area are different from the actives.
+     * */
     private void showThresholdInputDialog(int mode){
         LayoutInflater layoutInflater = (LayoutInflater) getActivity()
                 .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);

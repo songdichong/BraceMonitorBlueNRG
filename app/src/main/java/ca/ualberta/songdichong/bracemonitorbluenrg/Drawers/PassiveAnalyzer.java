@@ -7,18 +7,39 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-/**
- * @author songdichong
- *
- * @object Analyzer: analyze the given file or downloaded data and get analyzer object in order to draw graph
- *
- * @constructor     1.downloadedData: List<String[]> from BluetoothLeService.
- *             or:  2.file: txt file where data are recorded
- *
- * @infomation List<Drawers.Days>
- *
- * @usage ConfigDrawerFragment
- */
+/*
+Copyright © 2020, University of Alberta. All Rights Reserved.
+
+This software is the confidential and proprietary information
+of the Department of Electrical and Computer Engineering at the University of Alberta (UofA).
+You shall not disclose such Confidential Information and shall use it only in accordance with the
+terms of the license agreement you entered into at the UofA.
+
+No part of the project, including this file, may be copied, propagated, or
+distributed except with the explicit written permission of Dr. Edmond Lou
+(elou@ualberta.ca).
+
+Project Name       : Brace Monitor Android User Interface - Single
+
+File Name          : PassiveAnalyzer.java
+
+Original Author    : Dichong Song
+
+File Last Modification Date : 2021/09/16
+
+File Description   :  The class inherits from Analyzer. The analyzer object is used
+                    to analyze the data recorded by the passive brace monitor
+
+Data Structure:
+                    Analyzer:   List<Days>: contains days information
+                                List<Records>: contains all records information
+
+                    Days:       List<Records>: contains records information for that specific day
+
+                    Records(abstract)----!isHeader---->NonHeaderRecords(abstract)------->ActiveRecords
+                       |                                                        |------->PassiveRecords
+                      |----------------------isHeader---------------------------------->HeaderRecords
+*/
 public class PassiveAnalyzer extends Analyzer {
     //use the file in the directory to generate analyzer class
     public PassiveAnalyzer(File file){

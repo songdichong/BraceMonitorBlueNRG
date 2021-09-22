@@ -1,5 +1,37 @@
 package ca.ualberta.songdichong.bracemonitorbluenrg.Drawers;
+/*
+Copyright © 2020, University of Alberta. All Rights Reserved.
 
+This software is the confidential and proprietary information
+of the Department of Electrical and Computer Engineering at the University of Alberta (UofA).
+You shall not disclose such Confidential Information and shall use it only in accordance with the
+terms of the license agreement you entered into at the UofA.
+
+No part of the project, including this file, may be copied, propagated, or
+distributed except with the explicit written permission of Dr. Edmond Lou
+(elou@ualberta.ca).
+
+Project Name       : Brace Monitor Android User Interface - Single
+
+File Name          : ActiveAnalyzer.java
+
+Original Author    : Dichong Song
+
+File Last Modification Date : 2021/09/16
+
+File Description   : The class inherits from Analyzer. The analyzer object is used
+                    to analyze the data recorded by the active brace monitor
+
+Data Structure:
+                    Analyzer:   List<Days>: contains days information
+                                List<Records>: contains all records information
+
+                    Days:       List<Records>: contains records information for that specific day
+
+                    Records(abstract)----!isHeader---->NonHeaderRecords(abstract)------->ActiveRecords
+                       |                                                        |------->PassiveRecords
+                      |----------------------isHeader---------------------------------->HeaderRecords
+*/
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -8,12 +40,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ActiveAnalyzer extends Analyzer {
+    //For active we use target +- allowance. Ex: target = 30, allowance = 10.
+    // Then lower bound = 20, upper bound = 40
     private int allowance;
     List<Records> adjustmentRecordsList;
     //use the file in the directory to generate analyzer class
     public ActiveAnalyzer(File file){
         myDaysList = new ArrayList<>();
         myRecordsList = new ArrayList<>();
+        targetForce = 30.0f;
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
             //first line device name
@@ -70,6 +105,9 @@ public class ActiveAnalyzer extends Analyzer {
         catch(IOException e){
 
         }
+    }
+    public int getAllowance() {
+        return allowance;
     }
 
     private void formAnalyzer(List<Records> downloadedData)

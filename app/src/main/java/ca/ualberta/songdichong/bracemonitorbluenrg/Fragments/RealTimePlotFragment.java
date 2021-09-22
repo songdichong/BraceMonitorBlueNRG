@@ -279,7 +279,8 @@ public class RealTimePlotFragment extends Fragment {
     public void onPause() {
         super.onPause();
         getActivity().getApplicationContext().unregisterReceiver(updateReceiver);
-
+        mBluetoothLeService.setTargetPressure(0xff,0xff);
+        mBluetoothLeService.adjustmentEnabled = false;
     }
 
     public final BroadcastReceiver updateReceiver = new BroadcastReceiver() {

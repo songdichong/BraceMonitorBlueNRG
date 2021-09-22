@@ -41,7 +41,44 @@ import ca.ualberta.songdichong.bracemonitorbluenrg.ForcePlotActivity;
 import ca.ualberta.songdichong.bracemonitorbluenrg.ForceTemperaturePlotActivity;
 import ca.ualberta.songdichong.bracemonitorbluenrg.R;
 import ca.ualberta.songdichong.bracemonitorbluenrg.TemperaturePlotActivity;
+/*
+Copyright © 2020, University of Alberta. All Rights Reserved.
 
+This software is the confidential and proprietary information
+of the Department of Electrical and Computer Engineering at the University of Alberta (UofA).
+You shall not disclose such Confidential Information and shall use it only in accordance with the
+terms of the license agreement you entered into at the UofA.
+
+No part of the project, including this file, may be copied, propagated, or
+distributed except with the explicit written permission of Dr. Edmond Lou
+(elou@ualberta.ca).
+
+Project Name       : Brace Monitor Android User Interface
+
+File Name          : ConfigureDrawerFragment.java
+
+Original Author    : Dichong Song
+
+File Last Modification Date : 2021/09/16
+
+File Description: This file creates a view for configure analyze tools for the downloaded data from a brace monitor.
+
+Project Structure:
+ MainActivity : main activity of the project, all fragments are commit up on it
+
+             ----> HomeFragment (default): scan and connect with brace monitor devices
+             ----> ConfigureDrawerFragment: configure analyze tools for the downloaded data from a brace monitor
+                        ----> Other PlotActivities are started here
+   navigator ----> ConfigureSensorFragment: configure settings of a brace monitor
+             ----> GraphConfigurationFragment: change number of graph displaced in RealTimePlotFragment
+             ----> OutputDataFragment: download long-term data from a brace monitor and export it
+             ----> RealTimePlotFragment: plot the real-time force/pressure figure for all connected brace monitors
+             ----> AdvancedConfigurationFragment: configure advanced settings of a brace monitor
+             ----> CalibrationFragment: calibrate an active brace monitor (monitor only)
+
+ singleton object:  1.  mBluetoothLeService, handle all the communications of all connected device
+                    2.  analyzer, handle the analysis tools using Android device
+ */
 public class ConfigureDrawerFragment extends Fragment {
     static public Analyzer analyzer;
     static int analyzeMode = 0;
@@ -71,8 +108,6 @@ public class ConfigureDrawerFragment extends Fragment {
     int endDayofMonth;
     int endHourofDay;
     int endMinuteofHour;
-    static double force = 1.00;
-    static double temperature = 28.0;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -108,7 +143,7 @@ public class ConfigureDrawerFragment extends Fragment {
                     }else{
                         analyzer = new ActiveAnalyzer(BluetoothLeService.downloadedData);
                     }
-                    setStartEndDateTime();
+
                     analyzeMode = 1;
                     Toast.makeText(getContext(), "Analyze active brace monitor now.", Toast.LENGTH_LONG).show();
                 }
@@ -124,10 +159,13 @@ public class ConfigureDrawerFragment extends Fragment {
                     }else{
                         analyzer = new PassiveAnalyzer(BluetoothLeService.downloadedData);
                     }
-                    setStartEndDateTime();
+
                     analyzeMode = 0;
                     Toast.makeText(getContext(), "Analyze passive brace monitor now.", Toast.LENGTH_LONG).show();
                 }
+                setStartEndDateTime();
+                referenceForceValue.setText(String.format("%.1f", analyzer.getTargetForce()));
+                referenceTemperatureValue.setText(String.format("%.1f", analyzer.getTargetTemperature()));
             }
         });
 
@@ -136,12 +174,9 @@ public class ConfigureDrawerFragment extends Fragment {
             public void onClick(View view) {
                 String forceString = referenceForceValue.getText().toString();
                 if (!forceString.equals("")){
-                    force = Double.parseDouble(forceString);
+                    analyzer.setTargetForce(Float.parseFloat(forceString));
                 }
-                else{
-                    force = analyzer.getTargetForce() == 0 ? 1.00 : analyzer.getTargetForce();
-                }
-                referenceForceValue.setText(String.format("%.2f",force));
+                referenceForceValue.setText(String.format("%.1f",analyzer.getTargetForce()));
             }
         });
 
@@ -150,12 +185,10 @@ public class ConfigureDrawerFragment extends Fragment {
             public void onClick(View view) {
                 String temperatureString = referenceTemperatureValue.getText().toString();
                 if (!temperatureString.equals("")){
-                    temperature = Double.valueOf(temperatureString);
+                    analyzer.setTargetTemperature(Float.parseFloat(temperatureString));
                 }
-                else{
-                    temperature = 28.0;
-                }
-                referenceTemperatureValue.setText(String.format("%.1f",temperature));
+
+                referenceTemperatureValue.setText(String.format("%.1f",analyzer.getTargetTemperature()));
             }
         });
 
@@ -163,7 +196,7 @@ public class ConfigureDrawerFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), ForcePlotActivity.class);
-                intent.putExtra("force", force);
+                intent.putExtra("force", analyzer.getTargetForce());
                 int[] startTime = new int[10];
                 startTime[0] = startYear;
                 startTime[1] = startMonth;
@@ -190,7 +223,7 @@ public class ConfigureDrawerFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), TemperaturePlotActivity.class);
-                intent.putExtra("temperature", temperature);
+                intent.putExtra("temperature", analyzer.getTargetTemperature());
                 int[] startTime = new int[10];
                 startTime[0] = startYear;
                 startTime[1] = startMonth;
@@ -217,8 +250,8 @@ public class ConfigureDrawerFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), ForceTemperaturePlotActivity.class);
-                intent.putExtra("temperature", temperature);
-                intent.putExtra("force", force);
+                intent.putExtra("temperature", analyzer.getTargetTemperature());
+                intent.putExtra("force", analyzer.getTargetForce());
                 int[] startTime = new int[10];
                 startTime[0] = startYear;
                 startTime[1] = startMonth;
@@ -328,35 +361,33 @@ public class ConfigureDrawerFragment extends Fragment {
     public void onResume() {
         super.onResume();
         analyzerModeSwitch.setChecked(analyzeMode == 1);
-        if (analyzer == null){
-            if (analyzeMode == 0) {
-                if (BluetoothLeService.downloadedData.size() == 0 ){
-                    File file = new File(Environment.getExternalStorageDirectory(), Constants.FILENAME);
-                    analyzer = new PassiveAnalyzer(file);
-                }else{
-                    analyzer = new PassiveAnalyzer(BluetoothLeService.downloadedData);
-                }
-                referenceForceValueTitle.setText(R.string.reference_force_active);
-                drawForcePlotButton.setText(R.string.force_plot_active);
-                drawForceTemperaturePlotButton.setText(R.string.force_temp_active);
-                drawAvgForcePlotButton.setText(R.string.force_average_active);
-                showAdjustDetailButton.setEnabled(true);
-            } else if (analyzeMode == 1)  {
-                if (BluetoothLeService.downloadedData.size() == 0 ){
-                    File file = new File(Environment.getExternalStorageDirectory(), Constants.ACTIVE_FILENAME);
-                    analyzer = new ActiveAnalyzer(file);
-                }else{
-                    analyzer = new ActiveAnalyzer(BluetoothLeService.downloadedData);
-                }
-                referenceForceValueTitle.setText(R.string.reference_force_passive);
-                drawForcePlotButton.setText(R.string.force_plot_passive);
-                drawForceTemperaturePlotButton.setText(R.string.force_temp_passive);
-                drawAvgForcePlotButton.setText(R.string.force_average_passive);
-                showAdjustDetailButton.setEnabled(false);
+        if (analyzeMode == 0) {
+            if (BluetoothLeService.downloadedData.size() == 0 ){
+                File file = new File(Environment.getExternalStorageDirectory(), Constants.FILENAME);
+                analyzer = new PassiveAnalyzer(file);
+            }else{
+                analyzer = new PassiveAnalyzer(BluetoothLeService.downloadedData);
             }
+            referenceForceValueTitle.setText(R.string.reference_force_passive);
+            drawForcePlotButton.setText(R.string.force_plot_passive);
+            drawForceTemperaturePlotButton.setText(R.string.force_temp_passive);
+            drawAvgForcePlotButton.setText(R.string.force_average_passive);
+            showAdjustDetailButton.setEnabled(false);
+        } else if (analyzeMode == 1)  {
+            if (BluetoothLeService.downloadedData.size() == 0 ){
+                File file = new File(Environment.getExternalStorageDirectory(), Constants.ACTIVE_FILENAME);
+                analyzer = new ActiveAnalyzer(file);
+            }else{
+                analyzer = new ActiveAnalyzer(BluetoothLeService.downloadedData);
+            }
+            referenceForceValueTitle.setText(R.string.reference_force_active);
+            drawForcePlotButton.setText(R.string.force_plot_active);
+            drawForceTemperaturePlotButton.setText(R.string.force_temp_active);
+            drawAvgForcePlotButton.setText(R.string.force_average_active);
+            showAdjustDetailButton.setEnabled(true);
         }
 
-        referenceForceValue.setText(String.format("%.2f", analyzer.getTargetForce() == 0 ? 1.00 : analyzer.getTargetForce()));
+        referenceForceValue.setText(String.format("%.1f", analyzer.getTargetForce() == 0 ? 1.00 : analyzer.getTargetForce()));
 
 
         if (analyzer.getMyDaysList().size() == 0){

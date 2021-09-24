@@ -30,7 +30,7 @@
         android:title="Device Calibration">
         <Preference
             android:key="check_calibration_status"
-            android:title="Re-Check Force Calibration Status"
+            android:title="Update Force Calibration Status"
             android:summary="Reload force calibration values from device."/>
         <Preference
             android:key="set_0N_value"

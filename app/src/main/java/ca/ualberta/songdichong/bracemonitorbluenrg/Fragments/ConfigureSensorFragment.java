@@ -52,9 +52,44 @@ import ca.ualberta.songdichong.bracemonitorbluenrg.BluetoothLeService;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Constants;
 import ca.ualberta.songdichong.bracemonitorbluenrg.MainActivity;
 import ca.ualberta.songdichong.bracemonitorbluenrg.R;
+/*
+Copyright © 2020, University of Alberta. All Rights Reserved.
 
+This software is the confidential and proprietary information
+of the Department of Electrical and Computer Engineering at the University of Alberta (UofA).
+You shall not disclose such Confidential Information and shall use it only in accordance with the
+terms of the license agreement you entered into at the UofA.
 
-@SuppressWarnings("deprecation")
+No part of the project, including this file, may be copied, propagated, or
+distributed except with the explicit written permission of Dr. Edmond Lou
+(elou@ualberta.ca).
+
+Project Name       : Brace Monitor Android User Interface
+
+File Name          : ConfigureSensorFragment.java
+
+Original Author    : Dichong Song
+
+File Last Modification Date : 2021/09/16
+
+File Description: This file creates a view for configure settings of a brace monitor.
+
+Project Structure:
+ MainActivity : main activity of the project, all fragments are commit up on it
+
+             ----> DeviceScanFragment (default): scan and connect with brace monitor devices
+             ----> ConfigureDrawerFragment: configure analyze tools for the downloaded data from a brace monitor
+                        ----> Other PlotActivities are started here
+   navigator ----> ConfigureSensorFragment: configure settings of a brace monitor
+             ----> GraphConfigurationFragment: change number of graph displaced in RealTimePlotFragment
+             ----> OutputDataFragment: download long-term data from a brace monitor and export it
+             ----> RealTimePlotFragment: plot the real-time force/pressure figure for all connected brace monitors
+             ----> AdvancedConfigurationFragment: configure advanced settings of a brace monitor
+             ----> CalibrationFragment: calibrate an active brace monitor (active only)
+
+ singleton object:  1.  mBluetoothLeService, handle all the communications of all connected device
+                    2.  analyzer, handle the analysis tools using Android device
+ */
 public class ConfigureSensorFragment extends PreferenceFragment{
     TextView batteryText;
     TextView temperatureText;
@@ -62,7 +97,6 @@ public class ConfigureSensorFragment extends PreferenceFragment{
     TextView versionText;
     TextView memoryText;
     BluetoothLeService mBluetoothLeService;
-    int[] sleepWakeTimeArray = new int[4];
     /*1. Assign buttons(preference) using findPreference function.
      2. Assign onPreferenceClickListener for the buttons(preference)*/
     @Override
@@ -182,11 +216,16 @@ public class ConfigureSensorFragment extends PreferenceFragment{
         super.onPause();
         getActivity().getApplicationContext().unregisterReceiver(updateReceiver);
     }
-
+    /*
+     * Object Name: updateReceiver
+     *
+     * Object Detail: When receive specific actions (packaged by specific Constants), update current fragment text
+     * */
     public final BroadcastReceiver updateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
+            //When ACTION_TEMP_UPDATE of current braceMonitorDevice is received, update temperatureText
             if (Constants.ACTION_TEMP_UPDATE.equals(action)) {
                 double temperature = intent.getDoubleExtra(Constants.ACTION_TEMP_UPDATE,0);
                 temperatureText.setText(String.format("%.1f",temperature) + "°C");
@@ -217,7 +256,13 @@ public class ConfigureSensorFragment extends PreferenceFragment{
             }
         }
     };
-
+    /*
+     * Function Name: showTimePopup
+     *
+     * Function Input: None
+     * Function Output: None
+     * Function Detail: pop up a window for 2 times and let user select time between 0-24.
+     * */
     private void showTimePopup(int sleepOrWake) {
         //sleep
         if (sleepOrWake == 1){

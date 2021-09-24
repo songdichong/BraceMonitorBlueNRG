@@ -32,7 +32,44 @@ import ca.ualberta.songdichong.bracemonitorbluenrg.Constants;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.LinearRegression;
 import ca.ualberta.songdichong.bracemonitorbluenrg.MainActivity;
 import ca.ualberta.songdichong.bracemonitorbluenrg.R;
+/*
+Copyright © 2020, University of Alberta. All Rights Reserved.
 
+This software is the confidential and proprietary information
+of the Department of Electrical and Computer Engineering at the University of Alberta (UofA).
+You shall not disclose such Confidential Information and shall use it only in accordance with the
+terms of the license agreement you entered into at the UofA.
+
+No part of the project, including this file, may be copied, propagated, or
+distributed except with the explicit written permission of Dr. Edmond Lou
+(elou@ualberta.ca).
+
+Project Name       : Brace Monitor Android User Interface - Single
+
+File Name          : CalibrationFragment.java
+
+Original Author    : Dichong Song
+
+File Last Modification Date : 2021/09/16
+
+File Description: This file creates a view to calibrate an active brace monitor (active only)
+
+Project Structure:
+ MainActivity : main activity of the project, all fragments are commit up on it
+
+             ----> DeviceScanFragment (default): scan and connect with brace monitor devices
+             ----> ConfigureDrawerFragment: configure analyze tools for the downloaded data from a brace monitor
+                        ----> Other PlotActivities are started here
+   navigator ----> ConfigureSensorFragment: configure settings of a brace monitor
+             ----> GraphConfigurationFragment: change number of graph displaced in RealTimePlotFragment
+             ----> OutputDataFragment: download long-term data from a brace monitor and export it
+             ----> RealTimePlotFragment: plot the real-time force/pressure figure for all connected brace monitors
+             ----> AdvancedConfigurationFragment: configure advanced settings of a brace monitor
+             ----> CalibrationFragment: calibrate an active brace monitor (active only)
+
+ singleton object:  1.  mBluetoothLeService, handle all the communications of all connected device
+                    2.  analyzer, handle the analysis tools using Android device
+ */
 public class CalibrationFragment  extends Fragment {
     private BluetoothLeService mBluetoothLeService;
     Button addCalibrationButton;
@@ -71,6 +108,7 @@ public class CalibrationFragment  extends Fragment {
                 showNumInput();
             }
         });
+        //remove last index in list
         deleteCalibrationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -81,7 +119,7 @@ public class CalibrationFragment  extends Fragment {
                 }
             }
         });
-
+        //linear regression with all data saved
         calculateCalibrationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -137,7 +175,6 @@ public class CalibrationFragment  extends Fragment {
     public void onPause() {
         super.onPause();
         mBluetoothLeService.updateForceSampling(false);
-
         getActivity().getApplicationContext().unregisterReceiver(updateReceiver);
     }
 
@@ -158,19 +195,34 @@ public class CalibrationFragment  extends Fragment {
             }
         }
     };
+    /*
+     * Function Name:    showFormulaText
+     * Function Input:   None
+     * Function Output:  None
+     *
+     * Function Detail:  After linear regression is done, modify calibrationFormulaTextView to
+     *                   show equation and R² value
+     * */
     private void showFormulaText(){
         StringBuilder text = new StringBuilder("P = ");
-        text.append(String.format("%.2f",slope)  + " * V ");
+        text.append(String.format("%.2f", slope)).append(" * V ");
         if (intercept >= 0){
             text.append("+ ");
         } else {
             text.append("- ");
         }
-        text.append(String.format("%.2f",Math.abs(intercept)) + "\n");
-        text.append("R²: "+String.format("%.4f",r2));
+        text.append(String.format("%.2f", Math.abs(intercept))).append("\n");
+        text.append("R²: ").append(String.format("%.4f", r2));
         calibrationFormulaTextView.setText(text);
     }
 
+    /*
+     * Function Name:    showNumInput
+     * Function Input:   None
+     * Function Output:  None
+     *
+     * Function Detail:  When doing calibration, show input dialog for user to input current real world pressure value
+     * */
     private void showNumInput(){
         LayoutInflater layoutInflater = (LayoutInflater) getActivity().getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         View layout = layoutInflater.inflate(R.layout.number_input_dialog, null, false);

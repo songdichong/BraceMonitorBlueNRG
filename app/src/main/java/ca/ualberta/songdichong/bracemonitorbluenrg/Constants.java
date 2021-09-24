@@ -1,7 +1,29 @@
 package ca.ualberta.songdichong.bracemonitorbluenrg;
 
 import java.util.UUID;
+/*
+Copyright © 2020, University of Alberta. All Rights Reserved.
 
+This software is the confidential and proprietary information
+of the Department of Electrical and Computer Engineering at the University of Alberta (UofA).
+You shall not disclose such Confidential Information and shall use it only in accordance with the
+terms of the license agreement you entered into at the UofA.
+
+No part of the project, including this file, may be copied, propagated, or
+distributed except with the explicit written permission of Dr. Edmond Lou
+(elou@ualberta.ca).
+
+Project Name       : Brace Monitor Android User Interface - Single
+
+File Name          : Constants.java
+
+Original Author    : Dichong Song
+
+File Creation Date : 2021/03/26
+
+File Description   : Some constants used in this project
+ *
+*/
 public class Constants {
     public static final UUID CONFIG_DESCRIPTOR = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
     //Battery service UUID

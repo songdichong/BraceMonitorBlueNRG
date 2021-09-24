@@ -63,9 +63,44 @@ import ca.ualberta.songdichong.bracemonitorbluenrg.MainActivity;
 import ca.ualberta.songdichong.bracemonitorbluenrg.R;
 
 import static ca.ualberta.songdichong.bracemonitorbluenrg.Constants.FILENAME;
+/*
+Copyright © 2020, University of Alberta. All Rights Reserved.
 
+This software is the confidential and proprietary information
+of the Department of Electrical and Computer Engineering at the University of Alberta (UofA).
+You shall not disclose such Confidential Information and shall use it only in accordance with the
+terms of the license agreement you entered into at the UofA.
 
-@SuppressWarnings("deprecation")
+No part of the project, including this file, may be copied, propagated, or
+distributed except with the explicit written permission of Dr. Edmond Lou
+(elou@ualberta.ca).
+
+Project Name       : Brace Monitor Android User Interface
+
+File Name          : RealTimePlotFragment.java
+
+Original Author    : Dichong Song
+
+File Last Modification Date : 2021/09/16
+
+File Description: This file creates a view to plot the real-time force/pressure figure for the connected brace monitor
+
+Project Structure:
+ MainActivity : main activity of the project, all fragments are commit up on it
+
+             ----> DeviceScanFragment (default): scan and connect with brace monitor devices
+             ----> ConfigureDrawerFragment: configure analyze tools for the downloaded data from a brace monitor
+                        ----> Other PlotActivities are started here
+   navigator ----> ConfigureSensorFragment: configure settings of a brace monitor
+             ----> GraphConfigurationFragment: change number of graph displaced in RealTimePlotFragment
+             ----> OutputDataFragment: download long-term data from a brace monitor and export it
+             ----> RealTimePlotFragment: plot the real-time force/pressure figure for all connected brace monitors
+             ----> AdvancedConfigurationFragment: configure advanced settings of a brace monitor
+             ----> CalibrationFragment: calibrate an active brace monitor (active only)
+
+ singleton object:  1.  mBluetoothLeService, handle all the communications of all connected device
+                    2.  analyzer, handle the analysis tools using Android device
+ */
 public class RealTimePlotFragment extends Fragment {
     View rootView;
     BluetoothLeService mBluetoothLeService;
@@ -229,22 +264,23 @@ public class RealTimePlotFragment extends Fragment {
         }
 
         if (mBluetoothLeService.adjustmentEnabled){
-//            setTargetForce.setBackgroundResource(R.drawable.green_rectangle_button);
             setTargetForce.getBackground().setColorFilter(new PorterDuffColorFilter(getResources().getColor(R.color.green_color), PorterDuff.Mode.MULTIPLY));
         }else {
-//            setTargetForce.setBackgroundResource(R.color.white_color);
             setTargetForce.getBackground().clearColorFilter();
         }
+        /*
+         * For the passive brace monitor, set target force button is simply save current force to device's internal flash memory
+         * For the active brace monitor, set target force button is to set a target force and the threshold value and enable real-time pressure adjustment
+         * */
         setTargetForce.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mBluetoothLeService.getDeviceInfoVal()== Constants.activeBraceMonitor){
                     if (mBluetoothLeService.adjustmentEnabled){
                         mBluetoothLeService.adjustmentEnabled = false;
+                        //My protocol: if firmware receive [0xFF,0xFF], stop real-time pressure adjustment
                         mBluetoothLeService.setTargetPressure(0xff,0xff);
-//                        setTargetForce.setBackgroundResource(android.R.drawable.btn_default);
                         setTargetForce.getBackground().clearColorFilter();
-
                     }else {
                         showInputDialog();
                     }
@@ -472,7 +508,14 @@ public class RealTimePlotFragment extends Fragment {
             return format.format(currentTime)+","+String.format("%.2f",force);
         }
     }
-
+    /*
+     * Function Name: showInputDialog
+     *
+     * Function Input: None
+     * Function Output: None
+     * Function Detail:  1. save current real-time data to a file
+     *                   2. use FileProviderUri to send the saved file to other devices
+     * */
     void showInputDialog(){
         LayoutInflater layoutInflater = (LayoutInflater) getActivity()
                 .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
@@ -570,7 +613,14 @@ public class RealTimePlotFragment extends Fragment {
         });
         popupWindow.showAtLocation(layout, Gravity.TOP, 0, 0);
     }
-
+    /*
+     * Function Name: showInputDialog
+     *
+     * Function Input: None
+     * Function Output: None
+     * Function Detail:  1. save current real-time data to a file
+     *                   2. use FileProviderUri to send the saved file to other devices
+     * */
     private void saveRealTimeData() {
         File file = new File(Environment.getExternalStorageDirectory(), Constants.REALTIMEDATAFILENAME);
         if (file.exists()) {
@@ -593,7 +643,13 @@ public class RealTimePlotFragment extends Fragment {
             e.printStackTrace();
         }
     }
-
+    /*
+     * Function Name: deleteFile
+     *
+     * Function Input: None
+     * Function Output: None
+     * Function Detail:  Delete REALTIMEDATAFILENAME
+     * */
     private void deleteFile() {
         File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), Constants.REALTIMEDATAFILENAME);
         if (file != null) {

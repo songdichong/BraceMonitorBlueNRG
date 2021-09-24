@@ -25,7 +25,28 @@ import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.PassiveAnalyzer;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Records;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.TimeWithinDay;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Fragments.ConfigureDrawerFragment;
+/*
+Copyright © 2020, University of Alberta. All Rights Reserved.
 
+This software is the confidential and proprietary information
+of the Department of Electrical and Computer Engineering at the University of Alberta (UofA).
+You shall not disclose such Confidential Information and shall use it only in accordance with the
+terms of the license agreement you entered into at the UofA.
+
+No part of the project, including this file, may be copied, propagated, or
+distributed except with the explicit written permission of Dr. Edmond Lou
+(elou@ualberta.ca).
+
+Project Name       : Brace Monitor Android User Interface - Single
+
+File Name          : AvgForcePlotActivity.java
+
+Original Author    : Dichong Song
+
+File Last Modification Date : 2021/09/16
+
+File Description: This file creates an activity for viewing details of brace monitor's average force/pressure within a day
+*/
 public class AvgForcePlotActivity extends Activity  {
     double max = 0.0;
     List<Date> xAxis = new ArrayList<>();

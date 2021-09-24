@@ -18,7 +18,7 @@ Original Author    : Dichong Song
 
 File Creation Date : 2021/03/26
 
-File Description   : The main activity of the android project. The default fragment is HomeFragment.
+File Description   : The main activity of the android project. The default fragment is DeviceScanFragment.
 
 Main Layout File    : activity_main (an empty layout) and nav_view (NavigationView)
 */
@@ -75,7 +75,6 @@ import ca.ualberta.songdichong.bracemonitorbluenrg.Fragments.DeviceScanFragment;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Fragments.OutPutDataFragment;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Fragments.RealTimePlotFragment;
 
-@SuppressWarnings("deprecation")
 public class MainActivity extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener {
     //Bluetooth low energy object. The read/write/notify methods are all included in this object
     static private BluetoothLeService mBluetoothLeService;

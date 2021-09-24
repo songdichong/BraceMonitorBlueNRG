@@ -24,9 +24,44 @@ import ca.ualberta.songdichong.bracemonitorbluenrg.BluetoothLeService;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Constants;
 import ca.ualberta.songdichong.bracemonitorbluenrg.MainActivity;
 import ca.ualberta.songdichong.bracemonitorbluenrg.R;
+/*
+Copyright © 2020, University of Alberta. All Rights Reserved.
 
+This software is the confidential and proprietary information
+of the Department of Electrical and Computer Engineering at the University of Alberta (UofA).
+You shall not disclose such Confidential Information and shall use it only in accordance with the
+terms of the license agreement you entered into at the UofA.
 
-@SuppressWarnings("deprecation")
+No part of the project, including this file, may be copied, propagated, or
+distributed except with the explicit written permission of Dr. Edmond Lou
+(elou@ualberta.ca).
+
+Project Name       : Brace Monitor Android User Interface
+
+File Name          : DeviceScanFragment.java
+
+Original Author    : Dichong Song
+
+File Last Modification Date : 2021/09/16
+
+File Description: This file creates a view for scanning and connecting with brace monitor devices
+
+Project Structure:
+ MainActivity : main activity of the project, all fragments are commit up on it
+
+             ----> DeviceScanFragment (default): scan and connect with brace monitor devices
+             ----> ConfigureDrawerFragment: configure analyze tools for the downloaded data from a brace monitor
+                        ----> Other PlotActivities are started here
+   navigator ----> ConfigureSensorFragment: configure settings of a brace monitor
+             ----> GraphConfigurationFragment: change number of graph displaced in RealTimePlotFragment
+             ----> OutputDataFragment: download long-term data from a brace monitor and export it
+             ----> RealTimePlotFragment: plot the real-time force/pressure figure for all connected brace monitors
+             ----> AdvancedConfigurationFragment: configure advanced settings of a brace monitor
+             ----> CalibrationFragment: calibrate an active brace monitor (active only)
+
+ singleton object:  1.  mBluetoothLeService, handle all the communications of all connected device
+                    2.  analyzer, handle the analysis tools using Android device
+ */
 public class DeviceScanFragment extends Fragment {
     ProgressBar progressBar;
     ListView bleDeviceListView;

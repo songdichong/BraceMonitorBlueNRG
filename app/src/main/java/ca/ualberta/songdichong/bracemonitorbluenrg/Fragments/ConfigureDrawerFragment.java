@@ -66,7 +66,7 @@ File Description: This file creates a view for configure analyze tools for the d
 Project Structure:
  MainActivity : main activity of the project, all fragments are commit up on it
 
-             ----> HomeFragment (default): scan and connect with brace monitor devices
+             ----> DeviceScanFragment (default): scan and connect with brace monitor devices
              ----> ConfigureDrawerFragment: configure analyze tools for the downloaded data from a brace monitor
                         ----> Other PlotActivities are started here
    navigator ----> ConfigureSensorFragment: configure settings of a brace monitor
@@ -74,14 +74,14 @@ Project Structure:
              ----> OutputDataFragment: download long-term data from a brace monitor and export it
              ----> RealTimePlotFragment: plot the real-time force/pressure figure for all connected brace monitors
              ----> AdvancedConfigurationFragment: configure advanced settings of a brace monitor
-             ----> CalibrationFragment: calibrate an active brace monitor (monitor only)
+             ----> CalibrationFragment: calibrate an active brace monitor (active only)
 
  singleton object:  1.  mBluetoothLeService, handle all the communications of all connected device
                     2.  analyzer, handle the analysis tools using Android device
  */
 public class ConfigureDrawerFragment extends Fragment {
-    static public Analyzer analyzer;
-    static int analyzeMode = 0;
+    static public Analyzer analyzer; //Singleton object to handle the analysis tools using Android device
+    static int analyzeMode = 0; //0 == passive, 1 == active. Should have use enum
     TextView startDateTime;
     TextView endDateTime;
     TextView referenceForceValueTitle;
@@ -111,6 +111,7 @@ public class ConfigureDrawerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        /*Assign fields to view*/
         View rootView = inflater.inflate(R.layout.fragment_config_drawer_layout, container,false);
         startDateTime = rootView.findViewById(R.id.start_datetime);
         endDateTime = rootView.findViewById(R.id.end_datetime);
@@ -128,9 +129,11 @@ public class ConfigureDrawerFragment extends Fragment {
         drawAvgTemperaturePlotButton = rootView.findViewById(R.id.draw_avg_temperature_plot_button);
         showAdjustDetailButton = rootView.findViewById(R.id.show_adjustment_enabled_button);
         analyzerModeSwitch = rootView.findViewById(R.id.mode_switch);
+        /*set listeners for switch/button*/
         analyzerModeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                //If set to checked, switch to active mode
                 if (isChecked) {
                     referenceForceValueTitle.setText(R.string.reference_force_active);
                     drawForcePlotButton.setText(R.string.force_plot_active);
@@ -147,6 +150,7 @@ public class ConfigureDrawerFragment extends Fragment {
                     analyzeMode = 1;
                     Toast.makeText(getContext(), "Analyze active brace monitor now.", Toast.LENGTH_LONG).show();
                 }
+                //If set to unchecked, switch to passive mode
                 else{
                     referenceForceValueTitle.setText(R.string.reference_force_passive);
                     drawForcePlotButton.setText(R.string.force_plot_passive);
@@ -354,9 +358,12 @@ public class ConfigureDrawerFragment extends Fragment {
             }
         });
         return rootView;
-
     }
 
+    /**
+     * 1. Generate analyzer object when return back to the page, if the analyzer is not assigned yet
+     * 2. Set UI accordingly
+     * */
     @Override
     public void onResume() {
         super.onResume();
@@ -398,7 +405,14 @@ public class ConfigureDrawerFragment extends Fragment {
         }
     }
 
-
+    /*
+     * Function Name: getTimeString
+     *
+     * Function Input: int time
+     * Output: String time:
+     *
+     * Function Detail: if time<10 add a 0. Otherwise return string(time).
+     * */
     public String getTimeString(int time){
         String result = String.valueOf(time);
         if (time<10){
@@ -406,8 +420,18 @@ public class ConfigureDrawerFragment extends Fragment {
         }
         return result;
     }
-
-
+    /*
+     * Function Name: setStartEndDateTime
+     *
+     * Function Input/Output: None
+     *
+     * Function Detail: find start and end time of analyzer and set start end time in UI
+     *
+     * Use first one and last correct one as start and end, since there could be corruption of data.
+     * Corruption happens when brace monitor loss the power but restored immediately, then the time data is lost and date is reset to 2000/Jan/01
+     * In clinical trials, since all data are erased, the start should always be correct, and we find the last correct data based on start.
+     *
+     * */
     public void setStartEndDateTime(){
         //downloaded data --> file --> nothing
         if (analyzer.isBlankData()){
@@ -498,7 +522,16 @@ public class ConfigureDrawerFragment extends Fragment {
         }
 
     }
-
+    /*
+     * Function Name: showCalendarPopup
+     *
+     * Function Input: long startDateLong: start date in milliseconds
+     *                 long endDateLong: end date in milliseconds
+     *                 boolean isStart: whether the window is for choosing start date or not
+     * Function Output: None
+     * Function Detail: pop up a window and let user select date between start end and end time
+     *
+     * */
     public void showCalendarPopup(long startDateLong, long endDateLong,final boolean isStart) {
         LayoutInflater layoutInflater = (LayoutInflater) getActivity()
                 .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
@@ -549,7 +582,13 @@ public class ConfigureDrawerFragment extends Fragment {
         });
         popupWindow.showAtLocation(layout, Gravity.TOP, 0, 0);
     }
-
+    /*
+     * Function Name: showTimePopup
+     *
+     * Function Input: boolean isStart: whether the window is for choosing start date or not
+     * Function Output: None
+     * Function Detail: pop up a window and let user select time between 0-24
+     * */
     public void showTimePopup(boolean isStart) {
         if (isStart) {
             TimePickerDialog tpd = new TimePickerDialog(getActivity(),

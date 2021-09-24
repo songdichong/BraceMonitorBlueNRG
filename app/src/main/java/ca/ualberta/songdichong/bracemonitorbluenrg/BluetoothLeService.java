@@ -147,7 +147,6 @@ public class BluetoothLeService {
     static int tempCaliRealVal = 23;
     static double tempCaliADCVal = 0.73;
 
-    double tempCaliVal = 0;
     static int sampleRate = 1;
     private int recordYear = 0;
     private int recordMonth = 0;
@@ -161,7 +160,6 @@ public class BluetoothLeService {
     private int currentAddress = Integer.MIN_VALUE;
     static public List<Records> downloadedData = new ArrayList<>();
     public boolean adjustmentEnabled = false;
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     /*
      * Function Name: setContext
      *
@@ -386,6 +384,7 @@ public class BluetoothLeService {
                         broadcastUpdate(ACTION_GATT_DISCONNECTED, "" );
                     }
                 }
+
                 //firmware bluenrg always return 0 on the first read of any characteristic, so if we read for the first time we read again
                 @Override
                 public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
@@ -766,7 +765,20 @@ public class BluetoothLeService {
             }
         }
     }
-
+    /*
+     * Function Name: getDeviceVersion
+     *
+     * Function Detail: Read currently selected device's version value.
+     *                  Since this function is added to the firmware after v1.1 and there have been some passive brace monitors used in clinical trials,
+     *                  its return type is boolean
+     * Search UUID_DEVICE_VERSION_VAL in onCharacteristicRead of mGattCallback to
+     * see what to do when callback is received from the firmware.
+     * (If nothing then no callback or nothing to do after sending this)
+     *
+     * Input: None
+     *
+     * Output: T == successfully read version number. F == failed to read version number
+     * */
     public boolean getDeviceVersion(){
         if (mBluetoothGatt != null && connected) {
             BluetoothGattService service = mBluetoothGatt.getService(UUID_DEVICEINFO_SERV);
@@ -782,21 +794,6 @@ public class BluetoothLeService {
         return false;
     }
 
-    public void getSamplingRate(){
-        if (mBluetoothGatt != null && connected) {
-            BluetoothGattService service = mBluetoothGatt.getService(UUID_LNG_TRM_SERV);
-            mBluetoothGatt.readCharacteristic(service.getCharacteristic(UUID_LNG_SAMPLING_RATE));
-            firstRead = true;
-        }
-    }
-
-    public void getDeviceHolder(){
-        if (mBluetoothGatt != null && connected) {
-            BluetoothGattService service = mBluetoothGatt.getService(UUID_FLASH_SERV);
-            mBluetoothGatt.readCharacteristic(service.getCharacteristic(UUID_DEVICE_HOLDER_VALUE));
-            firstRead = true;
-        }
-    }
     /*
      * Function Name: setDeviceHolder
      *
@@ -823,18 +820,6 @@ public class BluetoothLeService {
         }
     }
 
-    public void getTargetForce(){
-        if (mBluetoothGatt != null && connected) {
-            try{
-                BluetoothGattService service = mBluetoothGatt.getService(UUID_FORCE_SENSOR_SERV);
-                mBluetoothGatt.readCharacteristic(service.getCharacteristic(UUID_TARGET_FORCE_VALUE));
-                firstRead = true;
-            }
-            catch (Exception e){
-                makeToast("Get target force failed. Please connect again and try.");
-            }
-        }
-    }
     /*
      * Function Name: setTempCalibration
      *
@@ -864,7 +849,7 @@ public class BluetoothLeService {
      * Function Name: setTargetForce
      *
      * Function Detail: The function send a write request to UUID_TARGET_FORCE_VALUE to
-     *                  set target force value.
+     *                  set target force value. This function is for the passive brace monitor only.
      *
      * Search UUID_TARGET_FORCE_VALUE in onCharacteristicWrite of mGattCallback to
      * see what to do when callback is received from the firmware.
@@ -888,7 +873,22 @@ public class BluetoothLeService {
             makeToast("Set target force failed. Please connect again and try.");
         }
     }
-
+    /*
+     * Function Name: setTargetPressure
+     *
+     * Function Detail: The function send a write request to UUID_TARGET_FORCE_VALUE to
+     *                  set target force value. This function is for the active brace monitor only.
+     *
+     * Search UUID_TARGET_FORCE_VALUE in onCharacteristicWrite of mGattCallback to
+     * see what to do when callback is received from the firmware.
+     * (If nothing then no callback or nothing to do after sending this)
+     *
+     * Input: int targetPressure. Target pressure value to be sent,
+     *        int allowance. Allownance value. Range = target +- allowance
+     *        format in {target, allownace}
+     *
+     * Output: None.
+     * */
     public void setTargetPressure(int targetPressure, int allowance){
         try{
             BluetoothGattService service = mBluetoothGatt.getService(UUID_FORCE_SENSOR_SERV);
@@ -1021,7 +1021,19 @@ public class BluetoothLeService {
             }
         }
     }
-
+    /*
+     * Function Name: stopDownloadData
+     *
+     * Function Detail: The function disable the download notification.
+     *
+     * Search UUID_DOWNLOAD_VALUE in onCharacteristicChanged of mGattCallback to
+     * see what to do when callback is received from the firmware.
+     * (If nothing then no callback or nothing to do after sending this)
+     *
+     * Input: None.
+     *
+     * Output: None.
+     * */
     void stopDownloadData(){
         if (mBluetoothGatt != null && connected) {
             try{

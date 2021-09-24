@@ -29,7 +29,44 @@ import ca.ualberta.songdichong.bracemonitorbluenrg.Constants;
 import ca.ualberta.songdichong.bracemonitorbluenrg.Drawers.Records;
 import ca.ualberta.songdichong.bracemonitorbluenrg.MainActivity;
 import ca.ualberta.songdichong.bracemonitorbluenrg.R;
+/*
+Copyright © 2020, University of Alberta. All Rights Reserved.
 
+This software is the confidential and proprietary information
+of the Department of Electrical and Computer Engineering at the University of Alberta (UofA).
+You shall not disclose such Confidential Information and shall use it only in accordance with the
+terms of the license agreement you entered into at the UofA.
+
+No part of the project, including this file, may be copied, propagated, or
+distributed except with the explicit written permission of Dr. Edmond Lou
+(elou@ualberta.ca).
+
+Project Name       : Brace Monitor Android User Interface
+
+File Name          : OutPutDataFragment.java
+
+Original Author    : Dichong Song
+
+File Last Modification Date : 2021/09/16
+
+File Description: This file creates a view to download long-term data from a brace monitor and export it
+
+Project Structure:
+ MainActivity : main activity of the project, all fragments are commit up on it
+
+             ----> DeviceScanFragment (default): scan and connect with brace monitor devices
+             ----> ConfigureDrawerFragment: configure analyze tools for the downloaded data from a brace monitor
+                        ----> Other PlotActivities are started here
+   navigator ----> ConfigureSensorFragment: configure settings of a brace monitor
+             ----> GraphConfigurationFragment: change number of graph displaced in RealTimePlotFragment
+             ----> OutputDataFragment: download long-term data from a brace monitor and export it
+             ----> RealTimePlotFragment: plot the real-time force/pressure figure for all connected brace monitors
+             ----> AdvancedConfigurationFragment: configure advanced settings of a brace monitor
+             ----> CalibrationFragment: calibrate an active brace monitor (active only)
+
+ singleton object:  1.  mBluetoothLeService, handle all the communications of all connected device
+                    2.  analyzer, handle the analysis tools using Android device
+ */
 public class OutPutDataFragment extends PreferenceFragment {
     BluetoothLeService mBluetoothLeService;
     TextView batteryText;
@@ -47,6 +84,8 @@ public class OutPutDataFragment extends PreferenceFragment {
 
     double downloadedSize;
     double totalSize;
+    /*1. Assign buttons(preference) using findPreference function.
+    2. Assign onPreferenceClickListener for the buttons(preference)*/
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -138,7 +177,11 @@ public class OutPutDataFragment extends PreferenceFragment {
         getActivity().getApplicationContext().unregisterReceiver(updateReceiver);
     }
 
-
+    /**
+     * Class Name: UpdateTextThread
+     *
+     * Class Detail: This class is used to display a download spinner during data transfer.
+     */
     private class UpdateTextThread extends Thread {
         @Override
         public void run() {
@@ -171,7 +214,13 @@ public class OutPutDataFragment extends PreferenceFragment {
         }
     }
 
-
+    /*
+     * Function Name: showDownloadingDialogue
+     *
+     * Function Input: String text
+     * Function Output: None
+     * Function Detail: set text on the download spinner
+     * */
     public void showDownloadingDialogue(String text) {
         LayoutInflater layoutInflater = (LayoutInflater) getActivity()
                 .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
@@ -238,6 +287,7 @@ public class OutPutDataFragment extends PreferenceFragment {
 
             //When ACTION_DATA_ERASE of current braceMonitorDevice is received, determine how long should the
             //waiting dialogue should exists, then show this dialogue for x seconds.
+            //In the final version this value is always 64.
             else if (Constants.ACTION_DATA_ERASE.equals(action)){
                 if (getActivity() != null) {
                     final double timer = intent.getDoubleExtra(Constants.ACTION_DATA_ERASE,1);

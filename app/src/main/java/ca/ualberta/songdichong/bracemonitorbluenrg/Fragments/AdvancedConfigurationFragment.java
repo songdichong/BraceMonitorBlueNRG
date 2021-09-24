@@ -57,7 +57,7 @@ File Description: This file creates a view for the advanced configuration of a b
 Project Structure:
  MainActivity : main activity of the project, all fragments are commit up on it
 
-             ----> HomeFragment (default): scan and connect with brace monitor devices
+             ----> DeviceScanFragment (default): scan and connect with brace monitor devices
              ----> ConfigureDrawerFragment: configure analyze tools for the downloaded data from a brace monitor
                         ----> Other PlotActivities are started here
    navigator ----> ConfigureSensorFragment: configure settings of a brace monitor
@@ -65,7 +65,7 @@ Project Structure:
              ----> OutputDataFragment: download long-term data from a brace monitor and export it
              ----> RealTimePlotFragment: plot the real-time force/pressure figure for all connected brace monitors
              ----> AdvancedConfigurationFragment: configure advanced settings of a brace monitor
-             ----> CalibrationFragment: calibrate an active brace monitor (monitor only)
+             ----> CalibrationFragment: calibrate an active brace monitor (active only)
 
  singleton object:  1.  mBluetoothLeService, handle all the communications of all connected device
                     2.  analyzer, handle the analysis tools using Android device
@@ -547,7 +547,13 @@ public class  AdvancedConfigurationFragment extends PreferenceFragment {
         });
         popupWindow.showAtLocation(layout, Gravity.TOP, 0, 0);
     }
-
+    /*
+     * Function Name:    showCalibrationInputDialog
+     * Function Input:   None
+     * Function Output:  None
+     * Function Detail:  Show the calibration input dialog for passive brace monitors.
+     *                   Then write the user input into the device's flash memory.
+     * */
     private void showCalibrationInputDialog()
     {
         LayoutInflater layoutInflater = (LayoutInflater) getActivity()
@@ -573,11 +579,6 @@ public class  AdvancedConfigurationFragment extends PreferenceFragment {
                 int caliADC1 = convertCaliVoltageToADC(cali1);
                 int caliADC2 = convertCaliVoltageToADC(cali2);
                 int caliADC6 = convertCaliVoltageToADC(cali6);
-                Log.v("cali0",cali0 + " int:" +caliADC0);
-                Log.v("cali1",cali1 + " int:" +caliADC1);
-                Log.v("cali2",cali2 + " int:" +caliADC2);
-                Log.v("cali6",cali6 + " int:" +caliADC6);
-
                 mBluetoothLeService.setDeviceCalibrationVal(caliADC0,caliADC1,caliADC2,caliADC6);
                 popupWindow.dismiss();
             }
@@ -592,22 +593,34 @@ public class  AdvancedConfigurationFragment extends PreferenceFragment {
         popupWindow.showAtLocation(layout, Gravity.TOP, 0, 0);
     }
 
+    /*
+     * Object Name:    updateReceiver
+     * Object Detail:  Receive and handle updates
+     * */
     public final BroadcastReceiver updateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
+            //If disconnected restart app
             if (Constants.ACTION_GATT_DISCONNECTED.equals(action)) {
                 if (getActivity() != null) {
                     ((MainActivity)getActivity()).restart();
                 }
             }
+            //If temperature value update is received update the text
             if (Constants.ACTION_TEMP_UPDATE.equals(action)) {
                 double temperature = intent.getDoubleExtra(Constants.ACTION_TEMP_UPDATE,0);
                 temperatureText.setText(String.format("%.1f",temperature) + "°C");
-            } else if (Constants.ACTION_TEMPRAW_UPDATE.equals(action)) {
+            }
+            //If temperature raw value is received update the text
+            else if (Constants.ACTION_TEMPRAW_UPDATE.equals(action)) {
                 double temperature = intent.getDoubleExtra(Constants.ACTION_TEMPRAW_UPDATE,0);
                 temperatureVoltage.setText(String.format("%.2f",temperature) + "V");
-            } else if (Constants.ACTION_FORCE_UPDATE.equals(action)) {
+            }
+            //If force value update is received update the text
+            //Active: forceMeasurement =  slope * f + intercept
+            //Passive: equation is a piecewise function.
+            else if (Constants.ACTION_FORCE_UPDATE.equals(action)) {
                 if (mBluetoothLeService.getDeviceInfoVal() == Constants.activeBraceMonitor) {
                     double forceValue = intent.getDoubleExtra(Constants.ACTION_FORCE_UPDATE,0);
                     forceVoltage.setText(String.format("%.2f",forceValue) + "V");
@@ -638,6 +651,7 @@ public class  AdvancedConfigurationFragment extends PreferenceFragment {
                     forceText.setText(String.format("%.2f",forceMeasurement) + "N");
                 }
             }
+            //If external test update is received update the text
             else if (Constants.ACTION_EXTERNAL_TEST.equals(action)) {
                 byte[] array = intent.getByteArrayExtra(Constants.ACTION_EXTERNAL_TEST);
                 if (getActivity() != null && (array!= null)) {
@@ -659,7 +673,10 @@ public class  AdvancedConfigurationFragment extends PreferenceFragment {
             }
         }
     };
-
+    /*
+     * Object Name:    UpdateBlockThread
+     * Object Detail:  update the text when ACTION_EXTERNAL_TEST update is received
+     * */
     private class UpdateBlockThread extends Thread {
         @Override
         public void run() {
@@ -716,7 +733,12 @@ public class  AdvancedConfigurationFragment extends PreferenceFragment {
             });
         }
     }
-
+    /*
+     * Function Name:    showDownloadingDialogue
+     * Function Input:   String text. The test that want to show up on the downloading spinner
+     * Function Output:  None
+     * Function Detail:  Show a download spinner when downloading values.
+     * */
     public void showDownloadingDialogue(String text) {
         LayoutInflater layoutInflater = (LayoutInflater) getActivity()
                 .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);

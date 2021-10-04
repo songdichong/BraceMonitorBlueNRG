@@ -158,7 +158,7 @@ public class OutPutDataFragment extends PreferenceFragment {
         deviceName.setText(mBluetoothLeService.deviceName);
         versionText.setText("v"+mBluetoothLeService.getDeviceVersionVal());
         if (mBluetoothLeService.getTotalAddress() != Integer.MIN_VALUE) {
-            double percentage = ((double)mBluetoothLeService.getTotalAddress() / 0x3FFFFF * 100);
+            double percentage = ((double)(mBluetoothLeService.getTotalAddress()) / Constants.memoryEndAddress * 100);
             memoryText.setText(String.format("%.1f",percentage)+"%");
         }
         IntentFilter filter = new IntentFilter();
@@ -194,7 +194,7 @@ public class OutPutDataFragment extends PreferenceFragment {
                         }
                         else{
                             Log.v("downloadedSize",downloadedSize+" "+totalSize);
-                            mNumSamplesText.setText("Downloading..." + (int)((downloadedSize/totalSize)*100) +" %");
+                            mNumSamplesText.setText("Downloading..." + (int)(((downloadedSize-4)/totalSize)*100) +" %");// 4 extra of 0XFFFF
                         }
                         if (handler != null) {
                             handler.removeCallbacksAndMessages(null);
@@ -262,7 +262,7 @@ public class OutPutDataFragment extends PreferenceFragment {
                     int address = array[1];
                     versionText.setText("v"+version);
                     if (mBluetoothLeService.getTotalAddress() != Integer.MIN_VALUE) {
-                        double percentage = ((double)address / 0x3FFFFF * 100);
+                        double percentage = ((double)(address) / Constants.memoryEndAddress * 100);//Extra 4 bytes of 0xFFFF
                         memoryText.setText(String.format("%.1f",percentage)+"%");
                     }
                 }

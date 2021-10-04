@@ -83,4 +83,7 @@ public class Constants {
     public static final int ADC_Input_AdcPin2 = 1;
     public static final int ADC_Input_AdcPin1 = 2;
     public static final int temperatureSensor = 3;
+    public static final int memoryEndAddress = 0x3CFFFF;
+
+
 }

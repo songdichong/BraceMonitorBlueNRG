@@ -63,6 +63,8 @@ import ca.ualberta.songdichong.bracemonitorbluenrg.MainActivity;
 import ca.ualberta.songdichong.bracemonitorbluenrg.R;
 
 import static ca.ualberta.songdichong.bracemonitorbluenrg.Constants.FILENAME;
+import static ca.ualberta.songdichong.bracemonitorbluenrg.Constants.activeBraceMonitor;
+
 /*
 Copyright © 2020, University of Alberta. All Rights Reserved.
 
@@ -315,8 +317,12 @@ public class RealTimePlotFragment extends Fragment {
     public void onPause() {
         super.onPause();
         getActivity().getApplicationContext().unregisterReceiver(updateReceiver);
-        mBluetoothLeService.setTargetPressure(0xff,0xff);
-        mBluetoothLeService.adjustmentEnabled = false;
+        if (mBluetoothLeService.getDeviceInfoVal()==activeBraceMonitor && mBluetoothLeService.adjustmentEnabled){
+            mBluetoothLeService.setTargetPressure(0xff,0xff);
+            mBluetoothLeService.adjustmentEnabled = false;
+        }
+
+
     }
 
     public final BroadcastReceiver updateReceiver = new BroadcastReceiver() {

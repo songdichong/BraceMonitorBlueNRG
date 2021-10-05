@@ -216,7 +216,7 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
         popupWindow.setAnimationStyle(R.style.Animation);
         Button button = layout.findViewById(R.id.confirm);
         Button cancelButton =  layout.findViewById(R.id.cancel);
-        final String currentTime = (String) DateFormat.format("yyyy-MM-dd hh:mm", new Date());
+        final String currentTime = (String) DateFormat.format("yyyy-MM-dd HH:mm", new Date());
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

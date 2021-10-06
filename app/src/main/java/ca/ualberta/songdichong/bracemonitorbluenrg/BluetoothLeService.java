@@ -168,7 +168,7 @@ public class BluetoothLeService {
      *
      * Input: None.
      *
-     * Output: boolean. True if success. False if fail.
+     * Output: None.
      * */
     public void setContext(Context context) {
         this.context = context;
@@ -1243,7 +1243,7 @@ public class BluetoothLeService {
                 // create Records object and add it into list
                 byte[] forceArray = new byte[]{arrays[index], arrays[index+1]};
                 byte[] temperatureArray = new byte[]{arrays[index+2], arrays[index+3]};
-                float temperature = convertADC(temperatureArray, temperatureSensor);
+                float temperature = convertADC(temperatureArray, temperatureSensor) + (float) (tempCaliRealVal-tempCaliADCVal);
                 float forceVoltage = convertADC(forceArray, ADC_Input_AdcPin2);
                 int longTermFlag = (arrays[index+4] < 0? arrays[index+4] + 256 : arrays[index+4]) + arrays[index+5]*256;
                 //forceCaliVal0 == slope forceCaliVal1 == intercept

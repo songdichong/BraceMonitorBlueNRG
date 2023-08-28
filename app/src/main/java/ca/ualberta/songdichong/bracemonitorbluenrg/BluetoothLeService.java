@@ -475,7 +475,7 @@ public class BluetoothLeService {
                                         makeToast("Device temperature is calibrated as:" + String.format("%.2f",tempCaliADCVal) + " ℃ -- "+ tempCaliRealVal + " ℃");
                                     }else{
                                         byte[] tempCali = new byte[]{characteristic.getValue()[0],characteristic.getValue()[1]};
-                                        tempCaliADCVal = convertADC(tempCali, ADC_Input_AdcPin2);
+                                        tempCaliADCVal = convertADC(tempCali, ADC_Input_AdcPin1);
                                         tempCaliRealVal =  characteristic.getValue()[2];
                                         makeToast("Device temperature is calibrated as:" + String.format("%.2f",tempCaliADCVal) + " V -- "+ tempCaliRealVal + " ℃");
                                     }
@@ -568,10 +568,10 @@ public class BluetoothLeService {
                                     byte[] cali1 = new byte[]{characteristic.getValue()[2],characteristic.getValue()[3]};
                                     byte[] cali2 = new byte[]{characteristic.getValue()[4],characteristic.getValue()[5]};
                                     byte[] cali3 = new byte[]{characteristic.getValue()[6],characteristic.getValue()[7]};
-                                    forceCaliVal0 = convertADC(cali0,ADC_Input_AdcPin1);
-                                    forceCaliVal1 = convertADC(cali1,ADC_Input_AdcPin1);
-                                    forceCaliVal2 = convertADC(cali2,ADC_Input_AdcPin1);
-                                    forceCaliVal3 = convertADC(cali3,ADC_Input_AdcPin1);
+                                    forceCaliVal0 = convertADC(cali0,ADC_Input_AdcPin2);
+                                    forceCaliVal1 = convertADC(cali1,ADC_Input_AdcPin2);
+                                    forceCaliVal2 = convertADC(cali2,ADC_Input_AdcPin2);
+                                    forceCaliVal3 = convertADC(cali3,ADC_Input_AdcPin2);
                                     calibrated = true;
                                     makeToast(String.format("%.3f",forceCaliVal0)+"\n" +String.format("%.3f",forceCaliVal1)+"\n"+ String.format("%.3f",forceCaliVal2)+"\n"+ String.format("%.3f",forceCaliVal3));
                                 }
@@ -603,7 +603,7 @@ public class BluetoothLeService {
                         if (deviceInfoVal == activeBraceMonitor){
                             forceADCVoltage = convertADC(characteristic.getValue(),ADC_Input_AdcPin2);
                         }else{
-                            forceADCVoltage = convertADC(characteristic.getValue(),ADC_Input_AdcPin1);
+                            forceADCVoltage = convertADC(characteristic.getValue(),ADC_Input_AdcPin2);
                         }
                         broadcastUpdate(ACTION_FORCE_UPDATE,forceADCVoltage);
                     }
@@ -614,7 +614,7 @@ public class BluetoothLeService {
                             temperature = temperature + (tempCaliRealVal-tempCaliADCVal);
                             broadcastUpdate(ACTION_TEMP_UPDATE,temperature);
                         }else{
-                            double tempADCVoltage = convertADC(characteristic.getValue(), ADC_Input_AdcPin2);
+                            double tempADCVoltage = convertADC(characteristic.getValue(), ADC_Input_AdcPin1);
                             double temperature = (tempADCVoltage - tempCaliADCVal)/0.01 + tempCaliRealVal;
                             broadcastUpdate(ACTION_TEMP_UPDATE,temperature);
                             broadcastUpdate(ACTION_TEMPRAW_UPDATE,tempADCVoltage);
@@ -1120,8 +1120,8 @@ public class BluetoothLeService {
                 // create Records object and add it into list
                 byte[] forceArray = new byte[]{arrays[index], arrays[index+1]};
                 byte[] temperatureArray = new byte[]{arrays[index+2], arrays[index+3]};
-                double temperatureVoltage = convertADC(temperatureArray, ADC_Input_AdcPin2);
-                float forceVoltage = convertADC(forceArray,ADC_Input_AdcPin1);
+                double temperatureVoltage = convertADC(temperatureArray, ADC_Input_AdcPin1);
+                float forceVoltage = convertADC(forceArray,ADC_Input_AdcPin2);
                 float temperature = (float)((temperatureVoltage - tempCaliADCVal)/0.01 + tempCaliRealVal);
 
                 double forceMeasurement;

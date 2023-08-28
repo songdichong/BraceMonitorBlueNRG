@@ -20,7 +20,7 @@ android {
 }
 android.applicationVariants.all { variant ->
     variant.outputs.all {
-        def appName = "BM-Single"
+        def appName = "BM-Single 2023"
         outputFileName = appName+"-${variant.versionName}.apk"
     }
 }
